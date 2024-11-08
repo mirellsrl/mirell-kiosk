@@ -1,0 +1,54 @@
+<!-- templates/step5.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="text-center mb-4">
+    <div class="emoji-title">📋</div>
+    <h2>Privacy</h2>
+</div>
+<form method="POST">
+    <div class="mb-3">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="privacy_accept" name="privacy_accept" required>
+            <label class="form-check-label" for="privacy_accept">
+                Accetto il trattamento dei miei dati personali secondo la normativa GDPR
+                <a href="#" data-bs-toggle="modal" data-bs-target="#gdprModal">Leggi la normativa</a>
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="marketing_accept" name="marketing_accept">
+            <label class="form-check-label" for="marketing_accept">
+                Accetto di ricevere comunicazioni marketing
+            </label>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary btn-lg w-100">Completa registrazione →</button>
+</form>
+
+<!-- GDPR Modal -->
+<div class="modal fade" id="gdprModal" tabindex="-1" aria-labelledby="gdprModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="gdprModalLabel">Privacy Policy</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Mirell Srl - con sede legale in Final di Rero (FE), Via Cortili Mariani 20F – ideatore e promotore delle attività disponibili nel sito www.mirell.it, si riserva il diritto di utilizzare i dati personali, forniti volontariamente dagli utenti, nel rispetto delle vigenti normative (artt 13 e ss. D. Lgs. 196/2003).</p>
+                <p>Il titolare del trattamento per i dati raccolti attraverso il sito è Mirell Srl – con sede legale in Final di Rero (FE), Via Cortili Mariani 20F, indirizzo email:mirell@mirell.it.</p>
+                <p>Tutti i dati raccolti saranno trattati presso la sede del titolare del trattamento, salvo quanto altrimenti specificato nella presente Privacy Policy.</p>
+                <p>Il titolare tratta i dati personali degli utenti adottando le opportune misure di sicurezza volte ad impedire l’accesso, la divulgazione, la modifica o la distruzione non autorizzate dei dati personali. Il trattamento viene effettuato mediante strumenti informatici e/o telematici, con modalità organizzative e con logiche strettamente correlate alle finalità indicate. Oltre al titolare, in alcuni casi, potrebbero avere accesso ai dati personali categorie di incaricati coinvolti nell’organizzazione del sito (personale amministrativo, commerciale, marketing, legali, amministratori di sistema) ovvero soggetti esterni (come fornitori di servizi tecnici terzi, corrieri postali, hosting provider, società informatiche, agenzie di comunicazione) nominati anche, se necessario, responsabili del trattamento da parte del titolare. L’elenco aggiornato dei responsabili del trattamento potrà sempre essere richiesto al titolare del trattamento.</p>
+                <p>Mirell Srl garantisce agli utenti che il trattamento dei dati personali sarà riservato ad utilizzi strettamente connessi e correlati alla prestazione dei propri servizi, alla facilitazione della gestione del sito e dell’evasione degli ordini.</p>
+                <p>In caso di pagamento con carta di credito, le informazioni fondamentali per l’esecuzione della transazione (numero della carta di credito/debito, data di scadenza, codice di sicurezza) saranno inviate all’ente responsabile del trattamento o eventualmente a società responsabili del controllo frodi, tramite protocollo crittografato, senza che terzi possano, in alcun modo, avervi accesso. Queste informazioni non saranno comunque mai visualizzate né memorizzate da parte del venditore (Mirell Srl).</p>
+                <p>I dati personali sono trattati con strumenti automatizzati per il tempo strettamente necessario a conseguire gli scopi per cui sono stati raccolti secondo quanto previsto dall’art. 11, lett. e) del Codice Privacy. Mirell Srl adotta tutte le misure di sicurezza previste dal Codice Privacy per proteggere i dati raccolti, al fine di scongiurare i rischi di perdita o furto dei dati, accessi non autorizzati, usi illeciti e non corretti.Tuttavia Mirell Srl non può garantire ai propri utenti che le misure adottate per la sicurezza del sito e della trasmissione dei dati e delle informazioni sul sito siano in grado di limitare o escludere qualsiasi rischio di accesso non consentito o di dispersione dei dati da parte di dispositivi di pertinenza dell’utente. Per tale motivo, suggeriamo agli utenti del sito di assicurarsi che il proprio computer sia dotato di software adeguati per la protezione della trasmissione in rete di dati (ad esempio antivirus aggiornati) e che il proprio Internet Provider abbia adottato misure idonee per la sicurezza della trasmissione di dati in rete.</p>
+                <p>Gli utenti possono esercitare in qualsiasi momento i diritti previsti dall’art. 7 del Codice Privacy, al fine di ottenere la conferma dell’esistenza o meno dei loro dati personali e di conoscerne il contenuto e l’origine, verificarne l’esattezza o chiederne l’integrazione o l’aggiornamento, oppure la rettificazione. Ai sensi della medesima disposizione l’utente potrà inoltre chiedere la cancellazione, la trasformazione in forma anonima o il blocco dei dati trattati in violazione di legge, nonché opporsi in ogni caso, per motivi legittimi, al loro trattamento. Le richieste vanno rivolte a Mirell Srl in qualità di responsabile del trattamento mediante il seguente recapito EMAIL:mirell@mirell.it. Attraverso il medesimo recapito, l’utente potrà chiedere inoltre la lista aggiornata di tutti i responsabili del trattamento nominati dal titolare.</p>
+                <p>La richiesta delle informazioni sopra elencate può essere rinnovata con un intervallo minimo di 90 giorni, fatta eccezione per quei casi ove sussista giusta causa: cancellazione o modifica di tali dati a causa di violazione della legge; cancellazione di quei dati che non sono utilizzabili per i motivi per i quali sono stati raccolti.</p>
+                <p>Il titolare del trattamento si riserva il diritto di apportare modifiche alla presente Privacy Policy in qualunque momento dandone pubblicità agli utenti su questa pagina. Si prega dunque di consultare spesso questa pagina, prendendo come riferimento la data di ultima modifica indicata al termine del documento. Nel caso di mancata accettazione delle modifiche apportate alla presente Privacy Policy, può richiedere al titolare del trattamento di cancellare i propri dati personali. Salvo quanto diversamente specificato, la precedente Privacy Policy continuerà ad applicarsi ai dati personali sino a quel momento raccolti.</p>
+                <p>Privacy Policy aggiornata al: 04/12/2017</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

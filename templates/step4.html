@@ -1,0 +1,16 @@
+<!-- templates/step4.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="text-center mb-4">
+    <div class="emoji-title">🎂</div>
+    <h2>Compleanno</h2>
+    <p>Inserisci la tua data di nascita per ricevere una sorpresa speciale! (opzionale)</p>
+</div>
+<form method="POST">
+    <div class="mb-3">
+        <label for="birthdate" class="form-label">Data di nascita (opzionale)</label>
+        <input type="date" class="form-control form-control-lg" id="birthdate" name="birthdate">
+    </div>
+    <button type="submit" class="btn btn-primary btn-lg w-100">Avanti →</button>
+</form>
+{% endblock %}

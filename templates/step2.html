@@ -1,0 +1,30 @@
+<!-- templates/step2.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="text-center mb-4">
+    <div class="emoji-title">📫</div>
+    <h2>Ciao {{name}}!👋🏻</h2>
+    <p>Inserisci la tua email per ricevere promozioni e novità</p>
+</div>
+<form method="POST" class="needs-validation" novalidate>
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control form-control-lg" id="email" name="email" required>
+    </div>
+    <button type="submit" class="btn btn-primary btn-lg w-100">Avanti →</button>
+</form>
+{% endblock %}
+{% block scripts %}
+    {% if get_flashed_messages() %}
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Errore',
+                text: '{{ get_flashed_messages()[0] }}'
+            });
+        </script>
+    {% endif %}
+{% endblock %}

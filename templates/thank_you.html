@@ -1,0 +1,23 @@
+<!-- templates/thank_you.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="text-center">
+    <div class="emoji-title">🎉</div>
+    <h2>Grazie per esserti registrata!</h2>
+    <p class="mb-4">Ti terremo aggiornata sulle nostre novità</p>
+    <a href="{{ url_for('start') }}" class="btn btn-primary btn-lg">Registra una nuova utente</a>
+</div>
+{% endblock %}
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+    <script>
+        function launchConfetti() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+        window.onload = launchConfetti;
+    </script>
+{% endblock %}

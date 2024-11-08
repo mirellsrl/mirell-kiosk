@@ -1,0 +1,36 @@
+<!-- templates/step1.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="text-center mb-4">
+    <div class="emoji-title">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" style="width: 125px;">
+    </div>
+    <h2>Benvenuta da Mirell!</h2>
+    <p>Inserisci i tuoi dati per ricevere offerte esclusive</p>
+</div>
+<form method="POST" class="needs-validation" novalidate>
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    <div class="mb-3">
+        <label for="name" class="form-label">Nome</label>
+        <input type="text" class="form-control form-control-lg" id="name" name="name" required>
+    </div>
+    <div class="mb-3">
+        <label for="surname" class="form-label">Cognome (opzionale)</label>
+        <input type="text" class="form-control form-control-lg" id="surname" name="surname">
+    </div>
+    <button type="submit" class="btn btn-primary btn-lg w-100">Avanti →</button>
+</form>
+{% endblock %}
+{% block scripts %}
+    {% if get_flashed_messages() %}
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Errore',
+                text: '{{ get_flashed_messages()[0] }}'
+            });
+        </script>
+    {% endif %}
+{% endblock %}
