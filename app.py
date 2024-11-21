@@ -5,6 +5,14 @@ from datetime import datetime
 from dotenv import load_dotenv
 import re, os
 
+# Load environment variables at startup
+load_dotenv()
+
+# Verify environment variables
+if not os.getenv('USER_KEY') or not os.getenv('ACCESS_TOKEN'):
+    raise ValueError("Missing required environment variables. Check your .env file")
+
+
 app = Flask(__name__)
 app.secret_key = "reO0jZmUgFCO0g3fy0wAbsYyXHN3OsJD"  # Required for session management
 
@@ -69,7 +77,27 @@ def step5():
         if 'privacy_accept' in request.form:
             try:
                 print(session)
-                # Add all the logic to add the user to marketing platforms
+                # # Add all the logic to add the user to marketing platforms
+
+                # groups = ['xHyUB5MBROIErT27pLaF']
+                
+                # # Collect all the necessary fields from the session
+                # name = session.get('name', '')
+                # surname = session.get('surname', '')
+                # phone_number = session.get('phone', '')
+                # email = session.get('email', '')
+                # birthdate = session.get('birthdate', '')
+
+                # print()
+
+                # # Call the create_contact function
+                # create_contact(
+                #     name=name,
+                #     surname=surname,
+                #     phone_number=phone_number,
+                #     group_ids=groups
+                # )
+                
                 return redirect(url_for('thank_you'))
             except Exception as e:
                 return render_template('error.html', error=str(e))

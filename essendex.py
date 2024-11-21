@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 import requests
 from typing import List, Optional
+import json
 
 # Load environment variables
 load_dotenv()
@@ -10,14 +11,6 @@ def create_contact(
     name: str,
     surname: str, 
     phone_number: str,
-    email: Optional[str] = None,
-    gender: Optional[str] = None,
-    fax: Optional[str] = None,
-    zip_code: Optional[str] = None,
-    address: Optional[str] = None,
-    city: Optional[str] = None,
-    province: Optional[str] = None,
-    birthdate: Optional[str] = None,
     group_ids: Optional[List[str]] = None
 ) -> dict:
     """
@@ -26,8 +19,8 @@ def create_contact(
     url = "https://app.esendex.it/API/v1.0/REST/contact"
 
     # Use provided credentials or fall back to env variables
-    user_key = user_key or os.getenv('USER_KEY')
-    access_token = access_token or os.getenv('ACCESS_TOKEN')
+    user_key = os.getenv('USER_KEY')
+    access_token = os.getenv('ACCESS_TOKEN')
 
     if not user_key or not access_token:
         raise ValueError("Missing credentials: USER_KEY and ACCESS_TOKEN must be provided")
@@ -43,14 +36,6 @@ def create_contact(
         "name": name,
         "surname": surname,
         "phoneNumber": phone_number,
-        "email": email,
-        "gender": gender,
-        "fax": fax,
-        "zip": zip_code,
-        "address": address,
-        "city": city,
-        "province": province,
-        "birthdate": birthdate,
         "groupIds": group_ids or []
     }
     
@@ -63,3 +48,52 @@ def create_contact(
         return response.json()
     except requests.exceptions.RequestException as e:
         raise Exception(f"Failed to create contact: {str(e)}")
+
+def send_sms(
+    message: str,
+    recipients: List[str],
+) -> dict:
+    """
+    Send an SMS using Essendex API
+    """
+    url = "https://app.esendex.it/API/v1.0/REST/sms"
+
+    # Use provided credentials or fall back to env variables
+    user_key = os.getenv('USER_KEY')
+    access_token = os.getenv('ACCESS_TOKEN')
+
+    if not user_key or not access_token:
+        raise ValueError("Missing credentials: USER_KEY and ACCESS_TOKEN must be provided")
+    
+    payload = {
+        "message_type": "LL",
+        "message": message,
+        "recipients": recipients,
+        "returnCredits": True
+    }
+
+    payload_json = json.dumps(payload)
+
+    print(payload_json)
+
+    headers = {
+        "Content-Type": "application/json",
+        "user_key": user_key,
+        "Access_token": access_token,
+    }
+    
+    try:
+        response = requests.post(url, headers=headers, json=payload_json)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        raise Exception(f"Failed to send SMS: {str(e)}")
+    
+
+def greet(name: str, phone_number: str) -> dict:
+    """
+    Greet a contact by sending an SMS
+    """
+    message = f"Hello {name}, this is a test message from Mirell"
+    return send_sms(message, [phone_number])
+   
