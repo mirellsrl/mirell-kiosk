@@ -23,7 +23,7 @@
             Swal.fire({
                 icon: 'error',
                 title: 'Errore',
-                text: '{{ get_flashed_messages()[0] }}'
+                text: {{ get_flashed_messages()[0]|tojson }}
             });
         </script>
     {% endif %}
