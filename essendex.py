@@ -7,7 +7,7 @@ import json
 # Load environment variables
 load_dotenv()
 
-def create_contact(
+def createMobytContact(
     name: str,
     surname: str, 
     phone_number: str,
@@ -17,6 +17,11 @@ def create_contact(
     Create a contact using Essendex API
     """
     url = "https://app.esendex.it/API/v1.0/REST/contact"
+
+    if group_ids is None:
+        group_ids = ["xHyUB5MBROIErT27pLaF"] # Default group of Mirell kiosk
+
+    print("Group ids: ", group_ids)
 
     # Use provided credentials or fall back to env variables
     user_key = os.getenv('USER_KEY')
@@ -41,6 +46,9 @@ def create_contact(
     
     # Remove None values from payload
     payload = {k: v for k, v in payload.items() if v is not None}
+
+    print("Payload: ", payload)
+    print("Headers: ", headers)
     
     try:
         response = requests.post(url, headers=headers, json=payload)

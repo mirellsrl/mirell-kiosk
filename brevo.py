@@ -30,12 +30,18 @@ def createBrevoContact(
     configuration.api_key['api-key'] = api_key
 
     api_instance = sib_api_v3_sdk.ContactsApi(sib_api_v3_sdk.ApiClient(configuration))
-    create_contact = sib_api_v3_sdk.CreateContact(email=email, list_ids=list_ids, attributes={
+    attributes = {
         "NOME": name,
-        "COGNOME": surname,
-        # "DATA_DI_NASCITA": bitrhdate,
-        # "TELEFONO": phone_number
-    })
+        "COGNOME": surname
+    }
+
+    if bitrhdate is not None:
+        attributes["BIRTHDAY"] = bitrhdate
+
+    if phone_number is not None:
+        attributes["SMS"] = phone_number
+
+    create_contact = sib_api_v3_sdk.CreateContact(email=email, list_ids=list_ids, attributes=attributes)
 
     try:
         api_response = api_instance.create_contact(create_contact)

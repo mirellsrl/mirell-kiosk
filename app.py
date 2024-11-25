@@ -1,6 +1,7 @@
 # app.py
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from essendex import create_contact
+from essendex import createMobytContact
+from brevo import createBrevoContact
 from datetime import datetime
 from dotenv import load_dotenv
 import re, os
@@ -88,6 +89,21 @@ def step5():
 
 @app.route('/thank-you')
 def thank_you():
+    name = session['name']
+    surname = session['surname']
+    email = session['email']
+    phone = session['phone']
+    birthdate = session['birthdate']
+
+    if birthdate:
+        birthdate = datetime.strptime(birthdate, '%Y-%m-%d').strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+
+    if phone:
+        phone = "+39" + phone
+        createMobytContact(name, surname, phone)
+
+    createBrevoContact(email, name, surname, birthdate, phone)
+    
     return render_template('thank_you.html')
 
 if __name__ == '__main__':
