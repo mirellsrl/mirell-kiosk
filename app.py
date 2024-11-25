@@ -29,11 +29,15 @@ def start():
 def step1():
     if request.method == 'POST':
         name = request.form['name']
-        if not name:
+        surname = request.form['surname']
+        if not name:           
             flash("Il nome è obbligatorio.", "error")
             return render_template('step1.html')
+        if not surname:
+            flash("Il cognome è obbligatorio.", "error")
+            return render_template('step1.html')
         session['name'] = name
-        session['surname'] = request.form.get('surname', '')
+        session['surname'] = surname
         return redirect(url_for('step2'))
     return render_template('step1.html')
 
@@ -76,28 +80,7 @@ def step5():
     if request.method == 'POST':
         if 'privacy_accept' in request.form:
             try:
-                print(session)
-                # # Add all the logic to add the user to marketing platforms
-
-                # groups = ['xHyUB5MBROIErT27pLaF']
-                
-                # # Collect all the necessary fields from the session
-                # name = session.get('name', '')
-                # surname = session.get('surname', '')
-                # phone_number = session.get('phone', '')
-                # email = session.get('email', '')
-                # birthdate = session.get('birthdate', '')
-
-                # print()
-
-                # # Call the create_contact function
-                # create_contact(
-                #     name=name,
-                #     surname=surname,
-                #     phone_number=phone_number,
-                #     group_ids=groups
-                # )
-                
+                print(session) 
                 return redirect(url_for('thank_you'))
             except Exception as e:
                 return render_template('error.html', error=str(e))
