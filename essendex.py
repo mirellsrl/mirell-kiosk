@@ -72,10 +72,6 @@ def send_sms(
         "returnCredits": True
     }
 
-    payload_json = json.dumps(payload)
-
-    print(payload_json)
-
     headers = {
         "Content-Type": "application/json",
         "user_key": user_key,
@@ -83,7 +79,7 @@ def send_sms(
     }
     
     try:
-        response = requests.post(url, headers=headers, json=payload_json)
+        response = requests.post(url, headers=headers, json=json.dumps(payload))
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
