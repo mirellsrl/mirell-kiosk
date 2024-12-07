@@ -1,5 +1,5 @@
 # app.py
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
 from essendex import createMobytContact
 from brevo import createBrevoContact
 from datetime import datetime
@@ -51,6 +51,14 @@ def is_valid_email(email):
 def start():
     session.clear()
     return redirect(url_for('step1'))
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(
+        os.path.join(app.root_path, 'static/images'),
+        'favicon.png', 
+        mimetype='image/vnd.microsoft.icon'
+    )
 
 @app.route('/step1', methods=['GET', 'POST'])
 def step1():
