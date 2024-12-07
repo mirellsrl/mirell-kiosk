@@ -10,6 +10,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import requests
 import logging
 
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 
 # Load environment variables at startup
 load_dotenv()
@@ -27,11 +29,11 @@ scheduler = APScheduler()
 scheduler.init_app(app)
 
 # Add function to keep server alive by pinging it every 10 minutes
-@scheduler.task('interval', id='ping_server', minutes=10, misfire_grace_time=None)
+@scheduler.task('interval', id='ping_server', minutes=2, misfire_grace_time=None)
 def ping_server():
     """Ping server to keep alive"""
     try:
-        url = "https://https://mirell-kiosk.onrender.com/ping"
+        url = "https://mirell-kiosk.onrender.com/ping"
         response = requests.get(url)
         if response.status_code == 200:
             logging.info("Server pinged successfully")
