@@ -5,6 +5,11 @@ from brevo import createBrevoContact
 from datetime import datetime
 from dotenv import load_dotenv
 import re, os
+from flask_apscheduler import APScheduler
+from apscheduler.schedulers.background import BackgroundScheduler
+import requests
+import logging
+
 
 # Load environment variables at startup
 load_dotenv()
@@ -16,6 +21,27 @@ if not os.getenv('USER_KEY') or not os.getenv('ACCESS_TOKEN'):
 
 app = Flask(__name__)
 app.secret_key = "reO0jZmUgFCO0g3fy0wAbsYyXHN3OsJD"  # Required for session management
+
+# Initialize scheduler
+scheduler = APScheduler()
+scheduler.init_app(app)
+
+# Add function to keep server alive by pinging it every 10 minutes
+@scheduler.task('interval', id='ping_server', minutes=10, misfire_grace_time=None)
+def ping_server():
+    """Ping server to keep alive"""
+    try:
+        url = "https://https://mirell-kiosk.onrender.com/ping"
+        response = requests.get(url)
+        if response.status_code == 200:
+            logging.info("Server pinged successfully")
+    except Exception as e:
+        logging.error(f"Error pinging server: {str(e)}")
+
+# Add ping route
+@app.route('/ping')
+def ping():
+    return 'pong'
 
 def is_valid_email(email):
     regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
@@ -81,7 +107,6 @@ def step5():
     if request.method == 'POST':
         if 'privacy_accept' in request.form:
             try:
-                print(session) 
                 return redirect(url_for('thank_you'))
             except Exception as e:
                 return render_template('error.html', error=str(e))
@@ -108,4 +133,5 @@ def thank_you():
 
 if __name__ == '__main__':
     load_dotenv()
+    scheduler.start()
     app.run(debug=True)

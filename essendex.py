@@ -21,8 +21,6 @@ def createMobytContact(
     if group_ids is None:
         group_ids = ["xHyUB5MBROIErT27pLaF"] # Default group of Mirell kiosk
 
-    print("Group ids: ", group_ids)
-
     # Use provided credentials or fall back to env variables
     user_key = os.getenv('USER_KEY')
     access_token = os.getenv('ACCESS_TOKEN')
@@ -46,9 +44,6 @@ def createMobytContact(
     
     # Remove None values from payload
     payload = {k: v for k, v in payload.items() if v is not None}
-
-    print("Payload: ", payload)
-    print("Headers: ", headers)
     
     try:
         response = requests.post(url, headers=headers, json=payload)
