@@ -4,8 +4,7 @@ from essendex import createMobytContact
 from brevo import createBrevoContact
 from datetime import datetime
 from dotenv import load_dotenv
-import re, os, logging, requests
-from apscheduler.schedulers.background import BackgroundScheduler
+import re, os, logging
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -17,30 +16,13 @@ load_dotenv()
 if not os.getenv('USER_KEY') or not os.getenv('ACCESS_TOKEN'):
     raise ValueError("Missing required environment variables. Check your .env file")
 
-
 app = Flask(__name__)
 app.secret_key = "reO0jZmUgFCO0g3fy0wAbsYyXHN3OsJD"  # Required for session management
 
-# Add function to keep server alive by pinging it
-def keep_alive():
-    """Ping server to keep alive"""
-    try:
-        url = "https://mirell-kiosk.onrender.com/ping"
-        response = requests.get(url)
-        if response.status_code == 200:
-            logging.info("Server pinged successfully")
-    except Exception as e:
-        logging.error(f"Error pinging server: {str(e)}")
-
-# Create scheduler
-scheduler = BackgroundScheduler()
-scheduler.add_job(func=keep_alive, trigger="interval", minutes=10)
-scheduler.start()
-
 # Add ping route
-@app.route('/ping')
-def ping():
-    return 'pong'
+@app.route('/healthz')
+def health():
+    return "OK"
 
 def is_valid_email(email):
     regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
