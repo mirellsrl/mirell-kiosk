@@ -35,6 +35,7 @@ def keep_alive():
 # Create scheduler
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=keep_alive, trigger="interval", minutes=10)
+scheduler.start()
 
 # Add ping route
 @app.route('/ping')
@@ -139,5 +140,4 @@ def thank_you():
 
 if __name__ == '__main__':
     load_dotenv()
-    scheduler.start()
     app.run(debug=True)
