@@ -4,11 +4,8 @@ from essendex import createMobytContact
 from brevo import createBrevoContact
 from datetime import datetime
 from dotenv import load_dotenv
-import re, os
-from flask_apscheduler import APScheduler
+import re, os, logging, requests
 from apscheduler.schedulers.background import BackgroundScheduler
-import requests
-import logging
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -24,13 +21,8 @@ if not os.getenv('USER_KEY') or not os.getenv('ACCESS_TOKEN'):
 app = Flask(__name__)
 app.secret_key = "reO0jZmUgFCO0g3fy0wAbsYyXHN3OsJD"  # Required for session management
 
-# Initialize scheduler
-scheduler = APScheduler()
-scheduler.init_app(app)
-
-# Add function to keep server alive by pinging it every 10 minutes
-@scheduler.task('interval', id='ping_server', minutes=2, misfire_grace_time=None)
-def ping_server():
+# Add function to keep server alive by pinging it
+def keep_alive():
     """Ping server to keep alive"""
     try:
         url = "https://mirell-kiosk.onrender.com/ping"
@@ -39,6 +31,10 @@ def ping_server():
             logging.info("Server pinged successfully")
     except Exception as e:
         logging.error(f"Error pinging server: {str(e)}")
+
+# Create scheduler
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=keep_alive, trigger="interval", minutes=10)
 
 # Add ping route
 @app.route('/ping')
