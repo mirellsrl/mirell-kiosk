@@ -4,10 +4,15 @@ from essendex import createMobytContact
 from brevo import createBrevoContact
 from datetime import datetime
 from dotenv import load_dotenv
-import re, os, logging
+import re, os, logging, sys
 
 # Set up logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    handlers=[logging.StreamHandler(sys.stdout)]
+    )
 
 # Load environment variables at startup
 load_dotenv()
@@ -23,6 +28,12 @@ app.secret_key = "reO0jZmUgFCO0g3fy0wAbsYyXHN3OsJD"  # Required for session mana
 @app.route('/healthz')
 def health():
     return "OK"
+
+# Add a method to wake up the app
+@app.route('/wakeup')
+def wakeup():
+    logging.info("System is woken up")
+    return "I'm awake!"
 
 def is_valid_email(email):
     regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
@@ -117,9 +128,10 @@ def thank_you():
         createMobytContact(name, surname, phone)
 
     createBrevoContact(email, name, surname, birthdate, phone)
-    
+    logging.info(f"Contact {name} {surname} created successfully")
     return render_template('thank_you.html')
 
 if __name__ == '__main__':
+    logging.info("Starting the app")
     load_dotenv()
     app.run(debug=True)

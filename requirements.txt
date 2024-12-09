@@ -3,5 +3,4 @@ Gunicorn
 sib-api-v3-sdk
 python-dotenv
 requests
-Flask-APScheduler
 logging
