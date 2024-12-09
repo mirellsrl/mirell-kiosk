@@ -30,6 +30,7 @@ def createBrevoContact(
     configuration.api_key['api-key'] = api_key
 
     api_instance = sib_api_v3_sdk.ContactsApi(sib_api_v3_sdk.ApiClient(configuration))
+
     attributes = {
         "NOME": name,
         "COGNOME": surname
@@ -41,10 +42,31 @@ def createBrevoContact(
     if phone_number is not None:
         attributes["SMS"] = phone_number
 
-    create_contact = sib_api_v3_sdk.CreateContact(email=email, list_ids=list_ids, attributes=attributes)
-
     try:
-        api_response = api_instance.create_contact(create_contact)
-        return api_response
+        # Check if contact exists
+        existing_contact = api_instance.get_contact_info(email)
+        
+        # Update existing contact
+        update_contact = sib_api_v3_sdk.UpdateContact(
+            attributes=attributes,
+            list_ids=list_ids
+        )
+
+        api_instance.update_contact(email, update_contact)
+        return {"status": "updated", "email": email}
+
     except ApiException as e:
-        print("Exception when calling Brevo ContactsApi->create_contact: %s\n" % e)
+        if e.status == 404:
+            # Contact doesn't exist, create new one
+            create_contact = sib_api_v3_sdk.CreateContact(
+                email=email,
+                attributes=attributes,
+                list_ids=list_ids
+            )
+            try:
+                api_instance.create_contact(create_contact)
+                return {"status": "created", "email": email}
+            except ApiException as create_error:
+                raise Exception(f"Failed to create contact: {str(create_error)}")
+        else:
+            raise Exception(f"Error checking contact: {str(e)}")
