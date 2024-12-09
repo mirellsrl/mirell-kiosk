@@ -43,9 +43,6 @@ def createBrevoContact(
         attributes["SMS"] = phone_number
 
     try:
-        # Check if contact exists
-        existing_contact = api_instance.get_contact_info(email)
-        
         # Update existing contact
         update_contact = sib_api_v3_sdk.UpdateContact(
             attributes=attributes,
