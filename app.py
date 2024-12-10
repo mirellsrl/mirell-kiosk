@@ -1,5 +1,5 @@
 # app.py
-from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, make_response
 from essendex import createMobytContact
 from brevo import createBrevoContact
 from datetime import datetime
@@ -34,6 +34,15 @@ def health():
 def wakeup():
     logging.info("System is woken up")
     return "I'm awake!"
+
+# Add a service worker route
+@app.route('/static/js/sw.js')
+def sw():
+    response = make_response(
+        send_from_directory('static/js', 'sw.js')
+    )
+    response.headers['Content-Type'] = 'application/javascript'
+    return response
 
 def is_valid_email(email):
     regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
