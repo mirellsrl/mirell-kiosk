@@ -71,7 +71,7 @@ def send_sms(
     payload = {
         "message_type": "LL",
         "message": message,
-        "recipients": recipients,
+        "recipient": recipients,
         "returnCredits": True
     }
 
@@ -82,17 +82,19 @@ def send_sms(
     }
     
     try:
-        response = requests.post(url, headers=headers, json=json.dumps(payload))
+        response = requests.post(url, headers=headers, json=payload)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
+        if e.response is not None:
+            print(f"Error response: {e.response.text}")
         raise Exception(f"Failed to send SMS: {str(e)}")
-    
 
-def greet(name: str, phone_number: str) -> dict:
+def confirm_subscription(name: str, phone_number: str) -> dict:
     """
-    Greet a contact by sending an SMS
+    Confirm subscription to Mirell Kiosk
     """
-    message = f"Hello {name}, this is a test message from Mirell"
-    return send_sms(message, [phone_number])
-   
+    # Send a confirmation SMS
+    message = f"Ciao {name}, grazie per esserti iscritta a Mirell! Ti terremo aggiornata sulle nostre promozioni."
+    response = send_sms(message, [phone_number])
+    return response

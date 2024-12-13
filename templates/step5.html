@@ -14,10 +14,18 @@
                 <a href="#" id="gdprLink">Leggi la normativa</a>
             </label>
         </div>
+        {% if session.phone %}
         <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="marketing_accept" name="marketing_accept">
-            <label class="form-check-label" for="marketing_accept">
-                Accetto di ricevere comunicazioni marketing da Mirell Srl via email📧 e SMS📱
+            <input class="form-check-input" type="checkbox" id="sms_marketing_accept" name="sms_marketing_accept">
+            <label class="form-check-label" for="sms_marketing_accept">
+                Accetto di ricevere comunicazioni marketing da Mirell Srl via SMS📱
+            </label>
+        </div>
+        {% endif %}
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="email_marketing_accept" name="email_marketing_accept">
+            <label class="form-check-label" for="email_marketing_accept">
+                Accetto di ricevere comunicazioni marketing da Mirell Srl via email📧
             </label>
         </div>
     </div>
@@ -51,14 +59,31 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.querySelector('form').addEventListener('submit', function(e) {
-        if (!document.getElementById('marketing_accept').checked) {
-            e.preventDefault();
-            Swal.fire({
-                title: 'Aspetta un attimo!',
-                text: 'Non vuoi ricevere le nostre email piene di sorprese? Promettiamo di non essere noiosi! 😊',
-                icon: 'warning',
-                confirmButtonText: 'Ok, mi avete convinto!'
-            });
+        const smsCheckbox = document.getElementById('sms_marketing_accept');
+        const emailCheckbox = document.getElementById('email_marketing_accept');
+        const smsChecked = smsCheckbox ? smsCheckbox.checked : true;
+        const emailChecked = emailCheckbox.checked;
+
+        if (smsCheckbox) {
+            if (!smsChecked || !emailChecked) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Aspetta un attimo!',
+                    text: 'Non vuoi ricevere le nostre email e messaggi pieni di sorprese? Promettiamo di non essere noiosi! 😊',
+                    icon: 'warning',
+                    confirmButtonText: 'Ok, mi avete convinto!'
+                });
+            }
+        } else {
+            if (!emailChecked) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Aspetta un attimo!',
+                    text: 'Non vuoi ricevere le nostre email piene di sorprese? Promettiamo di non essere noiosi! 😊',
+                    icon: 'warning',
+                    confirmButtonText: 'Ok, mi avete convinto!'
+                });
+            }
         }
     });
 });

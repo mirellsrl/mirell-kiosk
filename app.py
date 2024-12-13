@@ -1,6 +1,6 @@
 # app.py
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, make_response
-from essendex import createMobytContact
+from essendex import createMobytContact, confirm_subscription
 from brevo import createBrevoContact
 from datetime import datetime
 from dotenv import load_dotenv
@@ -116,6 +116,8 @@ def step5():
     if request.method == 'POST':
         if 'privacy_accept' in request.form:
             try:
+                session['sms_marketing_accept'] = 'sms_marketing_accept' in request.form
+                session['email_marketing_accept'] = 'email_marketing_accept' in request.form
                 return redirect(url_for('thank_you'))
             except Exception as e:
                 return render_template('error.html', error=str(e))
@@ -132,11 +134,14 @@ def thank_you():
     if birthdate:
         birthdate = datetime.strptime(birthdate, '%Y-%m-%d').strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
 
-    if phone:
+    if phone and session.get('sms_marketing_accept'):
         phone = "+39" + phone
         createMobytContact(name, surname, phone)
+        confirm_subscription(name, phone)
 
-    createBrevoContact(email, name, surname, birthdate, phone)
+    if session.get('email_marketing_accept'):
+        createBrevoContact(email, name, surname, birthdate, phone)
+    
     logging.info(f"Contact {name} {surname} created successfully")
     return render_template('thank_you.html')
 
