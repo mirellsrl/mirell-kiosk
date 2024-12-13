@@ -2,7 +2,6 @@ import os
 from dotenv import load_dotenv
 import requests
 from typing import List, Optional
-import json
 
 # Load environment variables
 load_dotenv()
@@ -67,7 +66,7 @@ def send_sms(
 
     if not user_key or not access_token:
         raise ValueError("Missing credentials: USER_KEY and ACCESS_TOKEN must be provided")
-    
+
     payload = {
         "message_type": "LL",
         "message": message,
@@ -95,6 +94,6 @@ def confirm_subscription(name: str, phone_number: str) -> dict:
     Confirm subscription to Mirell Kiosk
     """
     # Send a confirmation SMS
-    message = f"Ciao {name}, grazie per esserti iscritta a Mirell! Ti terremo aggiornata sulle nostre promozioni."
+    message = f"Ciao {name}, grazie per esserti iscritta a Mirell! Passa a trovarci sui nostri social: https://linktr.ee/mirellsrl"
     response = send_sms(message, [phone_number])
     return response
