@@ -68,9 +68,10 @@ def send_sms(
         raise ValueError("Missing credentials: USER_KEY and ACCESS_TOKEN must be provided")
 
     payload = {
-        "message_type": "LL",
+        "message_type": "N",
         "message": message,
         "recipient": recipients,
+        "sender": "MIRELL",
         "returnCredits": True
     }
 
