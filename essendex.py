@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 import requests
 from typing import List, Optional
+from datetime import datetime
 
 # Load environment variables
 load_dotenv()
@@ -10,7 +11,8 @@ def createMobytContact(
     name: str,
     surname: str, 
     phone_number: str,
-    group_ids: Optional[List[str]] = None
+    group_ids: Optional[List[str]] = None,
+    birthdate: Optional[str] = None,
 ) -> dict:
     """
     Create a contact using Essendex API
@@ -40,7 +42,15 @@ def createMobytContact(
         "phoneNumber": phone_number,
         "groupIds": group_ids or []
     }
-    
+
+    # Add birthdate if provided
+    if birthdate:
+        try:
+            birthdate = datetime.strptime(birthdate, "%Y-%m-%dT%H:%M:%S.%fZ").strftime("%d%m%y")
+        except ValueError:
+            raise ValueError("birthdate must be in the format YYYY-MM-DD")
+        payload["birthdate"] = birthdate
+
     # Remove None values from payload
     payload = {k: v for k, v in payload.items() if v is not None}
     

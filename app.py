@@ -136,7 +136,7 @@ def thank_you():
 
     if phone and session.get('sms_marketing_accept'):
         phone = "+39" + phone
-        createMobytContact(name, surname, phone)
+        createMobytContact(name, surname, phone, birthdate=birthdate)
         confirm_subscription(name, phone)
 
     if session.get('email_marketing_accept'):
