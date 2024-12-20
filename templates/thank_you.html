@@ -5,7 +5,7 @@
     <div class="emoji-title">🎉</div>
     <h2>Grazie per esserti registrata!</h2>
     <p class="mb-4">Ti terremo aggiornata sulle nostre novità</p>
-    <a href="{{ url_for('start') }}" class="btn btn-primary btn-lg">Nuova registrazione</a>
+    <a href="{{ url_for('start') }}" class="btn btn-primary btn-lg">Nuova registrazione <span id="countdown">(10)</span></a>
 </div>
 {% endblock %}
 {% block scripts %}
@@ -18,6 +18,23 @@
                 origin: { y: 0.6 }
             });
         }
-        window.onload = launchConfetti;
+
+        function startCountdown() {
+            var countdownElement = document.getElementById('countdown');
+            var countdown = 10;
+            var interval = setInterval(function() {
+                countdown--;
+                countdownElement.textContent = '(' + countdown + ')';
+                if (countdown <= 0) {
+                    clearInterval(interval);
+                    window.location.href = "{{ url_for('start') }}";
+                }
+            }, 1000);
+        }
+
+        window.onload = function() {
+            launchConfetti();
+            startCountdown();
+        };
     </script>
 {% endblock %}
