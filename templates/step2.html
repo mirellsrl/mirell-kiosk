@@ -18,13 +18,35 @@
 </form>
 {% endblock %}
 {% block scripts %}
-    {% if get_flashed_messages() %}
-        <script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Errore',
-                text: {{ get_flashed_messages()[0]|tojson }}
-            });
-        </script>
-    {% endif %}
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    const emailInput = document.getElementById('email');
+    if (!emailInput.value) {
+        e.preventDefault();
+        Swal.fire({
+            title: 'Email non inserita',
+            text: 'Sei sicura di voler procedere senza inserire la tua email?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Inserisci email',
+            cancelButtonText: 'Procedi senza email',
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33'
+        }).then((result) => {
+            if (result.isDismissed) {
+                e.target.submit();
+            }
+        });
+    }
+});
+</script>
+{% if get_flashed_messages() %}
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Errore',
+        text: {{ get_flashed_messages()[0]|tojson }}
+    });
+</script>
+{% endif %}
 {% endblock %}

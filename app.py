@@ -83,10 +83,7 @@ def step2():
         return redirect(url_for('step1'))
     if request.method == 'POST':
         email = request.form['email']
-        if not email:
-            flash("L'email è obbligatoria.", "error")
-            return render_template('step2.html', name=session['name'])
-        if not is_valid_email(email):
+        if email and not is_valid_email(email):
             flash("L'email inserita non è valida.", "error")
             return render_template('step2.html', name=session['name'])
         session['email'] = email
@@ -95,8 +92,8 @@ def step2():
 
 @app.route('/step3', methods=['GET', 'POST'])
 def step3():
-    if 'email' not in session:
-        return redirect(url_for('step2'))
+    if 'name' not in session:
+        return redirect(url_for('step1'))
     if request.method == 'POST':
         session['phone'] = request.form.get('phone', '')
         return redirect(url_for('step4'))
@@ -104,8 +101,8 @@ def step3():
 
 @app.route('/step4', methods=['GET', 'POST'])
 def step4():
-    if 'email' not in session:
-        return redirect(url_for('step2'))
+    if 'name' not in session:
+        return redirect(url_for('step1'))
     if request.method == 'POST':
         session['birthdate'] = request.form.get('birthdate', '')
         return redirect(url_for('step5'))
@@ -113,6 +110,11 @@ def step4():
 
 @app.route('/step5', methods=['GET', 'POST'])
 def step5():
+    if 'name' not in session:
+        return redirect(url_for('step1'))
+    if not session.get('email') and not session.get('phone'):
+        flash("Non hai inserito né un numero di telefono né un'email. Torna indietro e aggiungi almeno uno dei due per ricevere le nostre fantastiche sorprese! 😊.", "error")
+        return redirect(url_for('step2'))
     if request.method == 'POST':
         if 'privacy_accept' in request.form:
             try:
@@ -127,9 +129,9 @@ def step5():
 def thank_you():
     name = session['name']
     surname = session['surname']
-    email = session['email']
-    phone = session['phone']
-    birthdate = session['birthdate']
+    email = session.get('email')
+    phone = session.get('phone')
+    birthdate = session.get('birthdate')
 
     if birthdate:
         birthdate = datetime.strptime(birthdate, '%Y-%m-%d').strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
@@ -139,7 +141,7 @@ def thank_you():
         createMobytContact(name, surname, phone, birthdate=birthdate)
         confirm_subscription(name, phone)
 
-    if session.get('email_marketing_accept'):
+    if email and session.get('email_marketing_accept'):
         createBrevoContact(email, name, surname, birthdate, phone)
     
     logging.info(f"Contact {name} {surname} created successfully")
