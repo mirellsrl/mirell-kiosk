@@ -1,6 +1,7 @@
 # app.py
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, make_response
 from essendex import createMobytContact, confirm_subscription
+from squaddcrm import createSquaddCRMContact
 from brevo import createBrevoContact
 from datetime import datetime
 from dotenv import load_dotenv
@@ -140,10 +141,12 @@ def thank_you():
         phone = "+39" + phone
         createMobytContact(name, surname, phone, birthdate=birthdate)
         confirm_subscription(name, phone)
+        if email and session.get('email_marketing_accept'):
+            createBrevoContact(email, name, surname, birthdate, phone)
+            createSquaddCRMContact(name, surname, email, phone, birthdate)
+        else:
+            createSquaddCRMContact(name, surname, phone_number=phone, birthdate=birthdate)
 
-    if email and session.get('email_marketing_accept'):
-        createBrevoContact(email, name, surname, birthdate, phone)
-    
     logging.info(f"Contact {name} {surname} created successfully")
     return render_template('thank_you.html')
 
