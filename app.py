@@ -142,7 +142,7 @@ def thank_you():
         createMobytContact(name, surname, phone, birthdate=birthdate)
         # confirm_subscription(name, phone)
         if email and session.get('email_marketing_accept'):
-            createBrevoContact(email, name, surname, birthdate, phone)
+            # createBrevoContact(email, name, surname, birthdate, phone)
             createSquaddCRMContact(name, surname, email, phone, birthdate)
         else:
             createSquaddCRMContact(name, surname, phone_number=phone, birthdate=birthdate)
