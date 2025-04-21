@@ -155,7 +155,10 @@ def wedding():
     # Extract parameters from the URL
     fullname = request.args.get('fullname', '')
     phone = request.args.get('phone', '')
-    
+
+    # make the text capitalize
+    fullname = fullname.strip().title()
+
     # Split the fullname into name and surname
     name, surname = "", ""
     if fullname:

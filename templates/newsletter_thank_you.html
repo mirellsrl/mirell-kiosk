@@ -15,11 +15,27 @@
                         Riceverai presto le nostre comunicazioni in base alle preferenze che hai selezionato.
                     </p>
                     <p class="text-muted small">
-                        Puoi chiudere questa finestra in sicurezza.
+                        Questa finestra si chiuderà automaticamente tra <span id="countdown">5</span> secondi.
                     </p>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    // Set countdown for auto-closing the window
+    let seconds = 5;
+    const countdownElement = document.getElementById('countdown');
+    
+    const timer = setInterval(() => {
+        seconds--;
+        countdownElement.textContent = seconds;
+        
+        if (seconds <= 0) {
+            clearInterval(timer);
+            window.close();
+        }
+    }, 1000);
+</script>
 {% endblock %}
