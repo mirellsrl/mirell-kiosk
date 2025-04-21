@@ -150,6 +150,66 @@ def thank_you():
     logging.info(f"Contact {name} {surname} created successfully")
     return render_template('thank_you.html')
 
+@app.route('/wedding', methods=['GET', 'POST'])
+def wedding():
+    # Extract parameters from the URL
+    fullname = request.args.get('fullname', '')
+    phone = request.args.get('phone', '')
+    
+    # Split the fullname into name and surname
+    name, surname = "", ""
+    if fullname:
+        parts = fullname.split(' ', 1)
+        name = parts[0]
+        surname = parts[1] if len(parts) > 1 else ""
+    
+    if request.method == 'POST':
+        # Get form data
+        name = request.form.get('name', '').strip()
+        surname = request.form.get('surname', '').strip()
+        email = request.form.get('email', '').strip()
+        phone = request.form.get('phone', '').strip()
+        birthdate = request.form.get('birthdate', '').strip()
+        
+        # Validate required fields
+        if not name or not surname:
+            flash("Nome e cognome sono obbligatori.", "error")
+            return render_template('wedding.html', name=name, surname=surname, phone=phone, email=email, birthdate=birthdate)
+            
+        if not email and not phone:
+            flash("Inserisci almeno un contatto (email o telefono).", "error")
+            return render_template('wedding.html', name=name, surname=surname, phone=phone, email=email, birthdate=birthdate)
+        
+        if email and not is_valid_email(email):
+            flash("L'email inserita non è valida.", "error")
+            return render_template('wedding.html', name=name, surname=surname, phone=phone, email=email, birthdate=birthdate)
+        
+        # Since this is an internal platform, we always add the default tags
+        tags = ["negozio fisico", "cliente wedding"]
+        
+        # Process the data - create contact in Squadd
+        try:
+            if birthdate:
+                birthdate = datetime.strptime(birthdate, '%Y-%m-%d').strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+                
+            if phone:
+                if email:
+                    createSquaddCRMContact(name, surname, email, phone, birthdate, tags=tags)
+                else:
+                    createSquaddCRMContact(name, surname, None, phone, birthdate, tags=tags)
+            elif email:
+                createSquaddCRMContact(name, surname, email, None, birthdate, tags=tags)
+                
+            logging.info(f"Wedding form submission for {name} {surname} created successfully with tags: {', '.join(tags)}")
+            return render_template('newsletter_thank_you.html')
+        except Exception as e:
+            logging.error(f"Error creating contact: {str(e)}")
+            flash("Si è verificato un errore. Riprova più tardi.", "error")
+            return render_template('wedding.html', name=name, surname=surname, phone=phone, email=email, birthdate=birthdate)
+    
+    # For GET request, show the form with pre-populated values
+    return render_template('wedding.html', name=name, surname=surname, phone=phone)
+
 if __name__ == '__main__':
     logging.info("Starting the app")
     load_dotenv()
