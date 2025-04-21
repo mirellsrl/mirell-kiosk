@@ -13,6 +13,7 @@ def createSquaddCRMContact(
     email: Optional[str] = None,
     phone_number: Optional[str] = None,
     birthdate: Optional[str] = None,
+    tags: Optional[List[str]] = None,
 ) -> dict:
     
     token = os.getenv('SQUADDCRM_API_KEY')
@@ -49,6 +50,9 @@ def createSquaddCRMContact(
         # payload["birthMonth"] = datetime.strptime(birthdate, "%Y-%m-%dT%H:%M:%S.%fZ").strftime("%m")
         # payload["birthDay"] = datetime.strptime(birthdate, "%Y-%m-%dT%H:%M:%S.%fZ").strftime("%d")
 
+    if tags is None:
+        tags = ["negozio fisico"]
+
     try:
         response = requests.post(url, json=payload, headers=headers)
         response.raise_for_status()
@@ -57,7 +61,7 @@ def createSquaddCRMContact(
         updateTagUrl = f"https://services.leadconnectorhq.com/contacts/{contactId}/tags"
 
         updateTagPayload = {
-            "tags": ["negozio fisico"]
+            "tags": tags
         }
 
         response = requests.post(updateTagUrl, json=updateTagPayload, headers=headers)
@@ -66,3 +70,4 @@ def createSquaddCRMContact(
     except requests.exceptions.RequestException as e:
         raise Exception(f"Failed to create contact in SquaddCRM: {str(e)}")
     
+
