@@ -136,6 +136,8 @@ def thank_you():
 
     if birthdate:
         birthdate = datetime.strptime(birthdate, '%Y-%m-%d').strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+    
+    tags = ["negozio fisico", "da revisionare"]
 
     if phone and session.get('sms_marketing_accept'):
         phone = "+39" + phone
@@ -143,9 +145,9 @@ def thank_you():
         # confirm_subscription(name, phone)
         if email and session.get('email_marketing_accept'):
             # createBrevoContact(email, name, surname, birthdate, phone)
-            createSquaddCRMContact(name, surname, email, phone, birthdate)
+            createSquaddCRMContact(name, surname, email, phone, birthdate=birthdate, tags=tags)
         else:
-            createSquaddCRMContact(name, surname, phone_number=phone, birthdate=birthdate)
+            createSquaddCRMContact(name, surname, phone_number=phone, birthdate=birthdate, tags=tags)
 
     logging.info(f"Contact {name} {surname} created successfully")
     return render_template('thank_you.html')
@@ -188,7 +190,7 @@ def wedding():
             return render_template('wedding.html', name=name, surname=surname, phone=phone, email=email, birthdate=birthdate)
         
         # Since this is an internal platform, we always add the default tags
-        tags = ["negozio fisico", "cliente wedding"]
+        tags = ["negozio fisico", "cliente wedding", "da revisionare"]
         
         # Process the data - create contact in Squadd
         try:
