@@ -145,9 +145,9 @@ def thank_you():
         # confirm_subscription(name, phone)
         if email and session.get('email_marketing_accept'):
             # createBrevoContact(email, name, surname, birthdate, phone)
-            createSquaddCRMContact(name, surname, email, phone, birthdate=birthdate, tags=tags)
+            createSquaddCRMContact(name=name, surname=surname, wedding=False, email=email, phone_number=phone, birthdate=birthdate, tags=tags)
         else:
-            createSquaddCRMContact(name, surname, phone_number=phone, birthdate=birthdate, tags=tags)
+            createSquaddCRMContact(name=name, surname=surname, wedding=False, phone_number=phone, birthdate=birthdate, tags=tags)
 
     logging.info(f"Contact {name} {surname} created successfully")
     return render_template('thank_you.html')
@@ -199,11 +199,11 @@ def wedding():
                 
             if phone:
                 if email:
-                    createSquaddCRMContact(name, surname, email, phone, birthdate, tags=tags)
+                    createSquaddCRMContact(name=name, surname=surname, wedding=False, email=email, phone_number=phone, birthdate=birthdate, tags=tags)
                 else:
-                    createSquaddCRMContact(name, surname, None, phone, birthdate, tags=tags)
+                    createSquaddCRMContact(name=name, surname=surname, wedding=False, phone_number=phone, birthdate=birthdate, tags=tags)
             elif email:
-                createSquaddCRMContact(name, surname, email, None, birthdate, tags=tags)
+                createSquaddCRMContact(name=name, surname=surname, wedding=False, email=email, birthdate=birthdate, tags=tags)
                 
             logging.info(f"Wedding form submission for {name} {surname} created successfully with tags: {', '.join(tags)}")
             return render_template('newsletter_thank_you.html')

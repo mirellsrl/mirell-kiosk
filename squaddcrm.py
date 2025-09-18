@@ -9,7 +9,8 @@ load_dotenv()
 
 def createSquaddCRMContact(
     name: str,
-    surname: str, 
+    surname: str,
+    wedding: Optional[bool] = False, # if you want to update contacts in the mirell cerimonie
     email: Optional[str] = None,
     phone_number: Optional[str] = None,
     birthdate: Optional[str] = None,
@@ -24,14 +25,19 @@ def createSquaddCRMContact(
     url = "https://services.leadconnectorhq.com/contacts/upsert"
 
     headers = {
-        "Authorization": "Bearer " + os.getenv('SQUADDCRM_API_KEY'),
+        "Authorization": "Bearer " + token,
         "Version": "2021-07-28",
         "Content-Type": "application/json",
         "Accept": "application/json"
     }
 
+    if wedding:
+        location_id = "Xj2eg4ipxYYy2FjoezIW" # Mirell wedding
+    else:
+        location_id = "PLiy26xI6HF7txzhrIOJ" # Mirell shop squadd
+
     payload = {
-    "locationId": "PLiy26xI6HF7txzhrIOJ",
+    "locationId": location_id,
     "firstName": name,
     "lastName": surname,
     "name" : name + " " + surname,
@@ -69,5 +75,3 @@ def createSquaddCRMContact(
         return response.json()
     except requests.exceptions.RequestException as e:
         raise Exception(f"Failed to create contact in SquaddCRM: {str(e)}")
-    
-
