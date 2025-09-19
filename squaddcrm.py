@@ -17,12 +17,23 @@ def createSquaddCRMContact(
     tags: Optional[List[str]] = None,
 ) -> dict:
     
-    token = os.getenv('SQUADDCRM_API_KEY')
+    shop_token = os.getenv('SQUADDCRM_API_KEY')
+    wedding_token = os.getenv('SQUADDCRM_API_KEY_WEDDING')
 
-    if not token:
+    if not shop_token:
         raise ValueError("Missing credentials: SQUADDCRM_API_KEY must be provided")
     
+    if not wedding_token:
+        raise ValueError("Missing credentials: SQUADDCRM_API_KEY_WEDDING must be provided")
+    
     url = "https://services.leadconnectorhq.com/contacts/upsert"
+
+    if wedding:
+        location_id = "Xj2eg4ipxYYy2FjoezIW" # Mirell wedding
+        token = wedding_token
+    else:
+        location_id = "PLiy26xI6HF7txzhrIOJ" # Mirell shop squadd
+        token = shop_token
 
     headers = {
         "Authorization": "Bearer " + token,
@@ -30,11 +41,6 @@ def createSquaddCRMContact(
         "Content-Type": "application/json",
         "Accept": "application/json"
     }
-
-    if wedding:
-        location_id = "Xj2eg4ipxYYy2FjoezIW" # Mirell wedding
-    else:
-        location_id = "PLiy26xI6HF7txzhrIOJ" # Mirell shop squadd
 
     payload = {
     "locationId": location_id,
