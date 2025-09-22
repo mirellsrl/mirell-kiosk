@@ -1,0 +1,23 @@
+{
+    "name": "Mirell Fiera - Tenta la Fortuna",
+    "short_name": "Mirell Fiera",
+    "start_url": "/fiera",
+    "display": "fullscreen",
+    "orientation": "landscape-primary",
+    "background_color": "#f5f5f5",
+    "theme_color": "#d4af37",
+    "icons": [
+        {
+            "src": "/static/images/logo.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/static/images/logo.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

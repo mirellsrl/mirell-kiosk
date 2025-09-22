@@ -1,11 +1,11 @@
 # app.py
-from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, make_response
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, make_response, render_template_string
 from essendex import createMobytContact, confirm_subscription
 from squaddcrm import createSquaddCRMContact
 from brevo import createBrevoContact
 from datetime import datetime
 from dotenv import load_dotenv
-import re, os, logging, sys
+import re, os, logging, sys, json, random
 
 # Set up logging
 logging.basicConfig(
@@ -24,6 +24,11 @@ if not os.getenv('USER_KEY') or not os.getenv('ACCESS_TOKEN'):
 
 app = Flask(__name__)
 app.secret_key = "reO0jZmUgFCO0g3fy0wAbsYyXHN3OsJD"  # Required for session management
+
+# Configure session for PWA compatibility
+app.config['SESSION_COOKIE_SECURE'] = False  # Set to True for HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = False  # Allow JavaScript access for PWA
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Better PWA compatibility
 
 # Add ping route
 @app.route('/healthz')
@@ -48,6 +53,32 @@ def sw():
 def is_valid_email(email):
     regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
     return re.match(regex, email) is not None
+
+def select_prize():
+    """Select a prize based on probability weights from the JSON file"""
+    try:
+        with open('fiera_prizes.json', 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        prizes = data['prizes']
+        # Create a weighted list based on probability
+        weighted_prizes = []
+        for prize in prizes:
+            # Add each prize to the list based on its probability
+            weighted_prizes.extend([prize] * prize['probability'])
+        
+        # Select a random prize
+        selected_prize = random.choice(weighted_prizes)
+        return selected_prize
+    except Exception as e:
+        logging.error(f"Error selecting prize: {str(e)}")
+        # Return a default prize if there's an error
+        return {
+            "name": "Accessorio Gratuito",
+            "description": "Scegli un accessorio gratuito dalla nostra collezione",
+            "probability": 25,
+            "tag": "accessorio-gratuito"
+        }
 
 @app.route('/', methods=['GET'])
 def start():
@@ -214,6 +245,176 @@ def wedding():
     
     # For GET request, show the form with pre-populated values
     return render_template('wedding.html', name=name, surname=surname, phone=phone)
+
+@app.route('/fiera', methods=['GET'])
+def fiera():
+    """Main fiera PWA route - displays the form"""
+    # Check if device is authorized
+    logging.info(f"Fiera route accessed. Device authorized: {session.get('device_authorized')}")
+    if not session.get('device_authorized'):
+        logging.info("Redirecting to auth - device not authorized")
+        return redirect(url_for('fiera_auth'))
+    
+    session.pop('fiera_name', None)
+    session.pop('fiera_surname', None)
+    session.pop('fiera_phone', None)
+    session.pop('fiera_client_type', None)
+    session.pop('fiera_tags', None)
+    return render_template('fiera.html')
+
+@app.route('/fiera/auth', methods=['GET', 'POST'])
+def fiera_auth():
+    """Device authentication for fiera PWA"""
+    if request.method == 'POST':
+        device_key = request.form.get('device_key', '').strip()
+        expected_key = os.getenv('FIERA_DEVICE_KEY')
+        
+        if not expected_key:
+            flash("Configurazione del sistema non valida. Contatta l'amministratore.", "error")
+            return render_template('fiera_auth.html')
+        
+        if device_key == expected_key:
+            session['device_authorized'] = True
+            logging.info(f"Fiera device authorized from {request.remote_addr}")
+            return redirect(url_for('fiera'))
+        else:
+            logging.warning(f"Failed fiera auth attempt from {request.remote_addr} with key: {device_key}")
+            flash("Codice dispositivo non valido.", "error")
+            return render_template('fiera_auth.html')
+    
+    # If already authorized, redirect to fiera
+    current_auth_status = session.get('device_authorized')
+    logging.info(f"Auth page accessed. Current auth status: {current_auth_status}")
+    if current_auth_status:
+        logging.info("Already authorized, redirecting to fiera")
+        return redirect(url_for('fiera'))
+    
+    return render_template('fiera_auth.html')
+
+@app.route('/fiera/submit', methods=['POST'])
+def fiera_submit():
+    """Handle fiera form submission and create contact"""
+    # Check if device is authorized
+    if not session.get('device_authorized'):
+        return {'success': False, 'error': 'Accesso non autorizzato'}, 403
+    
+    try:
+        # Get form data
+        name = request.form.get('name', '').strip()
+        surname = request.form.get('surname', '').strip()
+        phone = request.form.get('phone', '').strip()
+        client_type = request.form.get('client_type', '').strip()
+        privacy_accept = 'privacy_accept' in request.form
+        
+        # Validate required fields
+        if not name or not surname or not phone or not client_type or not privacy_accept:
+            return {'success': False, 'error': 'Tutti i campi sono obbligatori'}, 400
+        
+        # Determine client type tag
+        client_type_tags = {
+            'sposa': 'fiera-sposa',
+            'mamma-sposa': 'fiera-mamma-sposa',
+            'mamma-sposo': 'fiera-mamma-sposo',
+            'testimone': 'fiera-testimone',
+            'altro': 'fiera-altro'
+        }
+        
+        client_tag = client_type_tags.get(client_type, 'fiera-altro')
+        tags = ["fiera", client_tag]
+        
+        # Format phone number
+        if phone and not phone.startswith('+39'):
+            phone = "+39" + phone
+        
+        # Create contact in SquaddCRM (wedding = True)
+        createSquaddCRMContact(
+            name=name, 
+            surname=surname, 
+            wedding=True, 
+            phone_number=phone, 
+            tags=tags
+        )
+        
+        # Store user data in session for game
+        session['fiera_name'] = name
+        session['fiera_surname'] = surname
+        session['fiera_phone'] = phone
+        session['fiera_client_type'] = client_type
+        session['fiera_tags'] = tags
+        
+        logging.info(f"Fiera contact {name} {surname} created successfully with tags: {', '.join(tags)}")
+        return {'success': True}, 200
+        
+    except Exception as e:
+        logging.error(f"Error creating fiera contact: {str(e)}")
+        return {'success': False, 'error': 'Si è verificato un errore. Riprova più tardi.'}, 500
+
+@app.route('/fiera/game', methods=['POST'])
+def fiera_game():
+    """Handle the game play and prize selection"""
+    # Check if device is authorized
+    if not session.get('device_authorized'):
+        return {'success': False, 'error': 'Accesso non autorizzato'}, 403
+    
+    try:
+        # Check if user has submitted form
+        if 'fiera_name' not in session:
+            return {'success': False, 'error': 'Devi prima compilare il modulo'}, 400
+        
+        # Select a prize
+        prize = select_prize()
+        
+        # Update contact with game tags
+        name = session['fiera_name']
+        surname = session['fiera_surname']
+        phone = session['fiera_phone']
+        existing_tags = session['fiera_tags']
+        
+        # Add game completion and prize tags
+        updated_tags = existing_tags + ["partita-effettuata", prize['tag']]
+        
+        # Update contact in SquaddCRM
+        createSquaddCRMContact(
+            name=name, 
+            surname=surname, 
+            wedding=True, 
+            phone_number=phone, 
+            tags=updated_tags
+        )
+        
+        logging.info(f"Fiera game completed for {name} {surname}. Prize: {prize['name']}")
+        return {
+            'success': True, 
+            'prize': {
+                'name': prize['name'],
+                'description': prize['description']
+            }
+        }, 200
+        
+    except Exception as e:
+        logging.error(f"Error in fiera game: {str(e)}")
+        return {'success': False, 'error': 'Si è verificato un errore durante il gioco'}, 500
+
+@app.route('/fiera/reset', methods=['POST'])
+def fiera_reset():
+    """Reset the game session"""
+    # Check if device is authorized  
+    if not session.get('device_authorized'):
+        return {'success': False, 'error': 'Accesso non autorizzato'}, 403
+        
+    # Clear only game-related session data, keep device authorization
+    session.pop('fiera_name', None)
+    session.pop('fiera_surname', None)
+    session.pop('fiera_phone', None)
+    session.pop('fiera_client_type', None)
+    session.pop('fiera_tags', None)
+    return {'success': True}, 200
+
+@app.route('/fiera/logout', methods=['POST'])
+def fiera_logout():
+    """Logout and clear device authorization"""
+    session.clear()
+    return {'success': True}, 200
 
 if __name__ == '__main__':
     logging.info("Starting the app")
