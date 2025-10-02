@@ -1242,6 +1242,13 @@
                     document.getElementById('gameContainer').classList.add('active');
                 } else {
                     showError(result.error || 'Si è verificato un errore');
+                    
+                    // If user has already played, reset after showing error
+                    if (result.already_played) {
+                        setTimeout(() => {
+                            resetGame();
+                        }, 3000); // Reset after 3 seconds
+                    }
                 }
             } catch (error) {
                 showError('Errore di connessione. Riprova più tardi.');

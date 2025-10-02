@@ -327,13 +327,23 @@ def fiera_submit():
             phone = "+39" + phone
         
         # Create contact in SquaddCRM (wedding = True)
-        createSquaddCRMContact(
+        result = createSquaddCRMContact(
             name=name, 
             surname=surname, 
             wedding=True, 
             phone_number=phone, 
             tags=tags
         )
+        
+        # Check if user has already played
+        user_tags = result.get('tags', [])
+        if 'partita-effettuata' in user_tags:
+            logging.info(f"User {name} {surname} has already played the game")
+            return {
+                'success': False, 
+                'error': 'Hai già giocato! Ogni persona può giocare una sola volta.',
+                'already_played': True
+            }, 400
         
         # Store user data in session for game
         session['fiera_name'] = name
