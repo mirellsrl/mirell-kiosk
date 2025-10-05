@@ -11,6 +11,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-touch-fullscreen" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -627,6 +628,24 @@
             display: none;
             text-align: center;
             animation: slideInUp 0.8s ease-out;
+            background: linear-gradient(135deg, #fffdf0 0%, #f7f0e8 100%);
+            border: 2px solid #d4af37;
+            border-radius: 20px;
+            padding: 40px 30px;
+            margin: 20px 0;
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.3), 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prize-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #d4af37, #f7e98e, #d4af37);
         }
 
         .prize-container.active {
@@ -645,24 +664,50 @@
         }
 
         .prize-title {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             color: #d4af37;
-            margin-bottom: 20px;
-            font-weight: bold;
+            margin-bottom: 15px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(212, 175, 55, 0.3);
+            background: linear-gradient(135deg, #d4af37, #f7e98e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .prize-name {
-            font-size: 2rem;
+            font-size: 1.8rem;
             color: #2c3e50;
-            margin-bottom: 15px;
-            font-weight: bold;
+            margin-bottom: 12px;
+            font-weight: 600;
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
+            border-radius: 15px;
+            border: 2px solid #d4af37;
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.2);
+            display: inline-block;
+            min-width: 280px;
         }
 
         .prize-description {
-            font-size: 1.2rem;
-            color: #7f8c8d;
-            margin-bottom: 30px;
+            font-size: 1.1rem;
+            color: #34495e;
+            margin-bottom: 20px;
             line-height: 1.6;
+            font-style: italic;
+            padding: 0 20px;
+        }
+
+        .prize-whatsapp-note {
+            font-size: 0.95rem;
+            color: #7f8c8d;
+            margin-top: 15px;
+            margin-bottom: 25px;
+            font-style: italic;
+            padding: 10px 20px;
+            background: rgba(244, 219, 212, 0.3);
+            border-radius: 10px;
+            border-left: 4px solid #d4af37;
         }
 
         .btn-secondary {
@@ -699,20 +744,45 @@
         }
 
         .btn-secondary.countdown {
-            background: linear-gradient(135deg, #2c3e50, #34495e);
-            border: 2px solid #3498db;
+            background: linear-gradient(135deg, #d4af37, #f7e98e, #d4af37);
+            border: 2px solid #c19b26;
             cursor: pointer;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+            box-shadow: 
+                0 8px 25px rgba(212, 175, 55, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.2) inset;
             transform: translateY(0);
             transition: all 0.3s ease;
+            color: #2c3e50;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
         }
 
         .btn-secondary.countdown:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 35px rgba(52, 152, 219, 0.4);
-            border-color: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 
+                0 15px 35px rgba(212, 175, 55, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+            border-color: #b8941f;
+        }
+
+        .btn-secondary.countdown::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.8s ease, height 0.8s ease;
+        }
+
+        .btn-secondary.countdown:hover::before {
+            width: 200px;
+            height: 200px;
         }
 
         .countdown-overlay {
@@ -721,37 +791,45 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(52, 152, 219, 0.9), rgba(41, 128, 185, 0.9));
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.95), rgba(247, 233, 142, 0.95));
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             font-weight: 700;
-            color: white;
+            color: #2c3e50;
             border-radius: 10px;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            animation: countdownPulse 1s ease-in-out infinite;
+            text-shadow: 0 2px 4px rgba(255, 255, 255, 0.3);
+            animation: weddingCountdownPulse 1s ease-in-out infinite;
+            border: 2px solid rgba(255, 255, 255, 0.3);
         }
 
-        @keyframes countdownPulse {
+        @keyframes weddingCountdownPulse {
             0%, 100% { 
-                opacity: 0.9;
+                opacity: 0.95;
                 transform: scale(1);
+                box-shadow: 0 0 20px rgba(212, 175, 55, 0.5) inset;
             }
             50% { 
                 opacity: 1;
                 transform: scale(1.02);
+                box-shadow: 0 0 30px rgba(212, 175, 55, 0.7) inset;
             }
         }
 
         @keyframes newGamePulse {
             0%, 100% { 
                 transform: scale(1);
-                box-shadow: 0 10px 30px rgba(52, 152, 219, 0.3);
+                box-shadow: 
+                    0 10px 30px rgba(212, 175, 55, 0.4),
+                    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
             }
             50% { 
-                transform: scale(1.05);
-                box-shadow: 0 15px 40px rgba(52, 152, 219, 0.5);
+                transform: scale(1.03);
+                box-shadow: 
+                    0 15px 40px rgba(212, 175, 55, 0.6),
+                    0 0 0 1px rgba(255, 255, 255, 0.3) inset,
+                    0 0 20px rgba(212, 175, 55, 0.3);
             }
         }
 
@@ -768,29 +846,47 @@
 
         .new-game-sparkle {
             position: absolute;
-            width: 4px;
-            height: 4px;
-            background: white;
+            width: 6px;
+            height: 6px;
+            background: linear-gradient(45deg, #fff, #f7e98e);
             border-radius: 50%;
             opacity: 0;
+            filter: drop-shadow(0 0 3px rgba(212, 175, 55, 0.5));
+        }
+
+        .new-game-sparkle:nth-child(odd) {
+            background: linear-gradient(45deg, #d4af37, #f7e98e);
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            width: 8px;
+            height: 8px;
+        }
+
+        .new-game-sparkle:nth-child(even) {
+            background: radial-gradient(circle, #fff 30%, #f7e98e 70%);
+            width: 5px;
+            height: 5px;
         }
 
         .new-game-sparkle.active {
-            animation: newGameSparkle 1.5s ease-in-out infinite;
+            animation: weddingSparkle 2s ease-in-out infinite;
         }
 
-        @keyframes newGameSparkle {
+        @keyframes weddingSparkle {
             0% {
                 opacity: 0;
-                transform: translateY(20px) scale(0);
+                transform: translateY(25px) scale(0) rotate(0deg);
             }
-            50% {
+            30% {
+                opacity: 0.8;
+                transform: translateY(5px) scale(1.2) rotate(180deg);
+            }
+            60% {
                 opacity: 1;
-                transform: translateY(-10px) scale(1);
+                transform: translateY(-15px) scale(1) rotate(270deg);
             }
             100% {
                 opacity: 0;
-                transform: translateY(-40px) scale(0);
+                transform: translateY(-50px) scale(0.5) rotate(360deg);
             }
         }
 
@@ -1136,14 +1232,21 @@
             <h2 class="prize-title" id="prizeTitle">🎉 Congratulazioni! 🎉</h2>
             <h3 class="prize-name" id="prizeName"></h3>
             <p class="prize-description" id="prizeDescription"></p>
+            <div class="prize-whatsapp-note">
+                📱 La ricevuta del premio verrà inviata via WhatsApp
+            </div>
             <button type="button" class="btn btn-secondary countdown" id="newGameButton" onclick="startCountdown()">
                 <div class="new-game-sparkles">
-                    <div class="new-game-sparkle" style="left: 20%; animation-delay: 0s;"></div>
-                    <div class="new-game-sparkle" style="left: 40%; animation-delay: 0.3s;"></div>
-                    <div class="new-game-sparkle" style="left: 60%; animation-delay: 0.6s;"></div>
-                    <div class="new-game-sparkle" style="left: 80%; animation-delay: 0.9s;"></div>
-                    <div class="new-game-sparkle" style="left: 30%; animation-delay: 1.2s;"></div>
-                    <div class="new-game-sparkle" style="left: 70%; animation-delay: 1.5s;"></div>
+                    <div class="new-game-sparkle" style="left: 15%; top: 20%; animation-delay: 0s;"></div>
+                    <div class="new-game-sparkle" style="left: 85%; top: 25%; animation-delay: 0.2s;"></div>
+                    <div class="new-game-sparkle" style="left: 25%; top: 70%; animation-delay: 0.4s;"></div>
+                    <div class="new-game-sparkle" style="left: 75%; top: 75%; animation-delay: 0.6s;"></div>
+                    <div class="new-game-sparkle" style="left: 50%; top: 15%; animation-delay: 0.8s;"></div>
+                    <div class="new-game-sparkle" style="left: 50%; top: 85%; animation-delay: 1s;"></div>
+                    <div class="new-game-sparkle" style="left: 10%; top: 50%; animation-delay: 1.2s;"></div>
+                    <div class="new-game-sparkle" style="left: 90%; top: 55%; animation-delay: 1.4s;"></div>
+                    <div class="new-game-sparkle" style="left: 35%; top: 35%; animation-delay: 1.6s;"></div>
+                    <div class="new-game-sparkle" style="left: 65%; top: 40%; animation-delay: 1.8s;"></div>
                 </div>
                 <div class="countdown-overlay" id="countdownOverlay" style="display: none;">10</div>
                 Nuova Partita
@@ -1400,6 +1503,9 @@
                     document.getElementById('gameContainer').classList.remove('active');
                     document.getElementById('prizeContainer').classList.add('active');
                     
+                    // Launch confetti celebration
+                    launchConfettiCelebration();
+                    
                     // Activate new game button animation
                     setTimeout(() => {
                         const newGameButton = document.getElementById('newGameButton');
@@ -1532,6 +1638,48 @@
             // Update step 3 title and subtitle
             document.getElementById('step3Title').innerHTML = `✨ Ciao <span class="personalized-text">${name}</span>, dimmi...`;
             document.getElementById('step3Subtitle').innerHTML = `Qual è il tuo ruolo speciale in questo matrimonio?`;
+        }
+
+        // Confetti celebration function using confetti library
+        function launchConfettiCelebration() {
+            // First burst - from left
+            confetti({
+                particleCount: 50,
+                spread: 60,
+                origin: { x: 0.2, y: 0.7 },
+                colors: ['#d4af37', '#f7e98e', '#ff69b4', '#00bcd4', '#4caf50']
+            });
+
+            // Second burst - from right (delayed)
+            setTimeout(() => {
+                confetti({
+                    particleCount: 50,
+                    spread: 60,
+                    origin: { x: 0.8, y: 0.7 },
+                    colors: ['#d4af37', '#f7e98e', '#ff69b4', '#00bcd4', '#4caf50']
+                });
+            }, 200);
+
+            // Third burst - from center (delayed)
+            setTimeout(() => {
+                confetti({
+                    particleCount: 80,
+                    spread: 80,
+                    origin: { x: 0.5, y: 0.6 },
+                    colors: ['#d4af37', '#f7e98e', '#ff69b4', '#00bcd4', '#4caf50']
+                });
+            }, 400);
+
+            // Final shower effect
+            setTimeout(() => {
+                confetti({
+                    particleCount: 100,
+                    spread: 120,
+                    origin: { x: 0.5, y: 0.3 },
+                    colors: ['#d4af37', '#f7e98e', '#ff69b4', '#00bcd4', '#4caf50'],
+                    shapes: ['square', 'circle']
+                });
+            }, 600);
         }
 
         // Auto-format phone number
