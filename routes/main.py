@@ -1,7 +1,6 @@
 """Main routes for the kiosk application"""
 from flask import render_template, request, redirect, url_for, session, flash
-from essendex import createMobytContact
-from squaddcrm import createSquaddCRMContact
+from api import createMobytContact, createSquaddCRMContact
 from datetime import datetime
 import re
 import logging

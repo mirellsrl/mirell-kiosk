@@ -5,13 +5,15 @@ import os
 
 load_dotenv()
 
+from typing import Optional
+
 def createBrevoContact(
     email: str,
     name: str,
     surname: str,
-    bitrhdate: str = None,
-    phone_number: str = None,
-    list_ids: list[str] = None,
+    bitrhdate: str | None = None,
+    phone_number: str | None = None,
+    list_ids: Optional[list[str]] = None,
 
 ) -> dict:
     """
@@ -19,7 +21,7 @@ def createBrevoContact(
     """
 
     if list_ids is None:
-        list_ids = [29] # Set default list of Mirell kiosk
+        list_ids = ["29"] # Set default list of Mirell kiosk
 
     api_key = os.getenv('BREVO_API_KEY')
 

@@ -1,6 +1,6 @@
 """Fiera PWA routes and event-based configuration"""
 from flask import render_template, request, redirect, url_for, session, Blueprint
-from squaddcrm import createSquaddCRMContact
+from api import createSquaddCRMContact
 import logging
 import json
 import random
