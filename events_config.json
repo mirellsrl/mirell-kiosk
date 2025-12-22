@@ -1,9 +1,9 @@
 {
   "events": {
-    "fiera-2025": {
-      "password": "fiera2025",
-      "tag_prefix": "fiera-2025",
-      "welcome_message": "Benvenuto alla Fiera 2025!",
+    "test": {
+      "password": "eventotestmirell",
+      "tag_prefix": "fiera-test",
+      "welcome_message": "[TEST] Benvenuto alla Fiera 2025!",
       "prizes": [
         {
           "name": "Tote Bag",
