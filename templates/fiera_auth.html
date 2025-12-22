@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autenticazione Dispositivo - Mirell Fiera</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#d4af37">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #d4af37, #f7e98e, #d4af37);
+        }
+
+        .logo {
+            width: 100px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        .auth-title {
+            color: #2c3e50;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .auth-subtitle {
+            color: #7f8c8d;
+            font-size: 1rem;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .auth-form {
+            width: 100%;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            text-align: center;
+            letter-spacing: 2px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            background: #fafafa;
+            text-transform: uppercase;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #d4af37;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #d4af37, #f7e98e);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+        }
+
+        .auth-btn:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .security-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #d4af37;
+        }
+
+        .security-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .security-text {
+            color: #6c757d;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .key-hints {
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: #95a5a6;
+            font-style: italic;
+        }
+
+        /* Responsive design */
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 30px 20px;
+            }
+            
+            .auth-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* iPad optimizations */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            .auth-container {
+                max-width: 600px;
+                padding: 50px;
+            }
+            
+            .auth-title {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Mirell Logo" class="logo">
+        <h1 class="auth-title">🔐 Accesso Dispositivo</h1>
+        <p class="auth-subtitle">
+            Inserisci il codice dispositivo per accedere all'applicazione Mirell Fiera
+        </p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="error-message show">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if error %}
+            <div class="error-message show">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST" class="auth-form" id="authForm">
+            <div class="form-group">
+                <label class="form-label" for="device_key">Codice Dispositivo</label>
+                <input 
+                    type="password" 
+                    id="device_key" 
+                    name="device_key" 
+                    class="form-input" 
+                    placeholder="INSERISCI CODICE"
+                    maxlength="20"
+                    required
+                    autocomplete="off"
+                >
+                <div class="key-hints">
+                    Il codice è composto da lettere e numeri (non case-sensitive)
+                </div>
+            </div>
+            <button type="submit" class="auth-btn">
+                🚀 Accedi al gioco
+            </button>
+        </form>
+
+    <script>
+        // Auto-focus on the input field
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('device_key').focus();
+        });
+
+        // Auto-uppercase input
+        document.getElementById('device_key').addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+
+        // Handle form submission with loading state
+        document.getElementById('authForm').addEventListener('submit', function(e) {
+            const button = this.querySelector('.auth-btn');
+            const input = document.getElementById('device_key');
+            
+            if (!input.value.trim()) {
+                e.preventDefault();
+                input.focus();
+                return;
+            }
+            
+            button.innerHTML = '🔄 Verificando...';
+            button.disabled = true;
+        });
+
+        // Hide error messages after 5 seconds
+        setTimeout(function() {
+            const errorMessages = document.querySelectorAll('.error-message.show');
+            errorMessages.forEach(function(msg) {
+                msg.style.opacity = '0';
+                setTimeout(function() {
+                    msg.style.display = 'none';
+                }, 300);
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

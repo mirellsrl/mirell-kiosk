@@ -1,0 +1,1693 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Mirell Fiera - Tenta la Fortuna</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='fiera-manifest.json') }}">
+    <meta name="theme-color" content="#d4af37">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-touch-fullscreen" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: 
+                radial-gradient(circle at 15% 20%, rgba(244, 219, 212, 0.4) 0%, rgba(244, 219, 212, 0.1) 40%, transparent 70%),
+                radial-gradient(circle at 85% 80%, rgba(244, 219, 212, 0.3) 0%, rgba(244, 219, 212, 0.05) 50%, transparent 70%),
+                radial-gradient(circle at 60% 10%, rgba(244, 219, 212, 0.2) 0%, rgba(244, 219, 212, 0.03) 60%, transparent 80%),
+                radial-gradient(circle at 25% 90%, rgba(244, 219, 212, 0.25) 0%, rgba(244, 219, 212, 0.08) 45%, transparent 65%),
+                radial-gradient(circle at 80% 30%, rgba(244, 219, 212, 0.15) 0%, rgba(244, 219, 212, 0.02) 55%, transparent 75%),
+                linear-gradient(135deg, #faf8f7 0%, #f9f6f4 50%, #f4dbd4 100%);
+            min-height: 100vh;
+            min-height: 100dvh; /* Dynamic viewport height for mobile */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            padding-left: max(20px, env(safe-area-inset-left));
+            padding-right: max(20px, env(safe-area-inset-right));
+            padding-top: max(20px, env(safe-area-inset-top));
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 
+                0 20px 60px rgba(244, 219, 212, 0.3),
+                0 10px 30px rgba(0, 0, 0, 0.05),
+                0 0 0 1px rgba(244, 219, 212, 0.1);
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #d4af37, #f7e98e, #d4af37);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 240px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+
+        .title {
+            color: #2c3e50;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .form-container {
+            display: block;
+        }
+
+        .form-step {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #d4af37;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .radio-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .radio-option {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .radio-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .radio-label {
+            display: block;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fafafa;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            text-align: center;
+            position: relative;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .radio-option input[type="radio"]:checked + .radio-label {
+            border-color: #d4af37;
+            background: #fffdf0;
+            color: #d4af37;
+            font-weight: bold;
+        }
+
+        .radio-label::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .radio-option input[type="radio"]:checked + .radio-label::after {
+            border-color: #d4af37;
+            background: #d4af37;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        /* Elegant Client Type Selection Styles */
+        .client-type-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .client-type-title {
+            font-size: 1.8rem;
+            color: #d4af37;
+            margin-bottom: 8px;
+            font-weight: 600;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, #d4af37, #f7e98e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .client-type-subtitle {
+            font-size: 1rem;
+            color: #7f8c8d;
+            margin-bottom: 25px;
+            font-style: italic;
+        }
+
+        .elegant-radio-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            max-width: 100%;
+        }
+
+        .elegant-radio-option {
+            position: relative;
+        }
+
+        .elegant-radio-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .elegant-radio-label {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 3px solid #e8ecf4;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            min-height: 80px;
+        }
+
+        .elegant-radio-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.15);
+            border-color: #d4af37;
+        }
+
+        .elegant-radio-label::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .elegant-radio-label:hover::before {
+            left: 100%;
+        }
+
+        .radio-icon {
+            font-size: 2.5rem;
+            margin-right: 20px;
+            width: 60px;
+            text-align: center;
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        .radio-text {
+            flex: 1;
+            text-align: left;
+        }
+
+        .radio-title {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 2px;
+        }
+
+        .radio-description {
+            display: block;
+            font-size: 0.95rem;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        .radio-checkmark {
+            font-size: 1.5rem;
+            color: #d4af37;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .elegant-radio-option input[type="radio"]:checked + .elegant-radio-label {
+            background: linear-gradient(135deg, #fffdf0 0%, #f7f0e8 100%);
+            border-color: #d4af37;
+            box-shadow: 0 8px 30px rgba(212, 175, 55, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .elegant-radio-option input[type="radio"]:checked + .elegant-radio-label .radio-checkmark {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .elegant-radio-option input[type="radio"]:checked + .elegant-radio-label .radio-title {
+            color: #d4af37;
+        }
+
+        .elegant-radio-option input[type="radio"]:checked + .elegant-radio-label .radio-description {
+            color: #b8860b;
+        }
+
+        /* Animation for selection */
+        @keyframes sparkle {
+            0%, 100% { 
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.1) rotate(180deg);
+                opacity: 0.8;
+            }
+        }
+
+        .elegant-radio-option input[type="radio"]:checked + .elegant-radio-label .radio-icon {
+            animation: sparkle 0.6s ease-in-out;
+        }
+
+        /* Personalized text styles */
+        .personalized-text {
+            color: #d4af37;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-title {
+            text-align: center;
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .checkbox-group {
+            margin: 20px 0;
+        }
+
+        .checkbox-option {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: #fafafa;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-option:hover {
+            background: #f0f0f0;
+        }
+
+        .checkbox-option input[type="checkbox"] {
+            margin-right: 15px;
+            transform: scale(1.3);
+            accent-color: #d4af37;
+        }
+
+        .checkbox-label {
+            flex: 1;
+            font-size: 1rem;
+            line-height: 1.4;
+            color: #2c3e50;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #d4af37, #f7e98e);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 15px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .game-container {
+            display: none;
+            text-align: center;
+        }
+
+        .game-container.active {
+            display: block;
+        }
+
+        .fortune-button {
+            width: 250px;
+            height: 250px;
+            background: linear-gradient(135deg, #d4af37, #f7e98e, #d4af37);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 30px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.3);
+            position: relative;
+            overflow: visible;
+        }
+
+        .fortune-button-content {
+            position: relative;
+            z-index: 3;
+            transition: all 0.3s ease;
+        }
+
+        .progress-ring {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            width: 270px;
+            height: 270px;
+            transform: rotate(-90deg);
+            z-index: 2;
+        }
+
+        .progress-ring-circle {
+            fill: none;
+            stroke: #fff;
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 848.23; /* 2 * π * 135 */
+            stroke-dashoffset: 848.23;
+            transition: stroke-dashoffset 0.1s linear;
+            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.8)) drop-shadow(0 0 24px rgba(52, 152, 219, 0.6));
+            opacity: 0.95;
+        }
+
+        .fortune-button.pressing .progress-ring-circle {
+            stroke: #3498db;
+            stroke-width: 10;
+            filter: drop-shadow(0 0 15px rgba(52, 152, 219, 1)) drop-shadow(0 0 30px rgba(52, 152, 219, 0.8));
+            animation: progressGlow 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes progressGlow {
+            0% { 
+                opacity: 0.8;
+                stroke-width: 10;
+            }
+            100% { 
+                opacity: 1;
+                stroke-width: 12;
+            }
+        }
+
+        .countdown-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            z-index: 4;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            display: none;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        @keyframes sparkleAnim {
+            0% {
+                opacity: 0;
+                transform: scale(0) rotate(0deg);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1) rotate(180deg);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0) rotate(360deg);
+            }
+        }
+
+        .sparkle.active {
+            animation: sparkleAnim 1s ease-in-out infinite;
+        }
+
+        .hold-instruction {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .hold-instruction::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .fortune-button:hover .hold-instruction {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-10px);
+        }
+
+        .fortune-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+            opacity: 0;
+        }
+
+        .fortune-button:hover::before {
+            opacity: 1;
+            animation: shine 2s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .fortune-button.pressed {
+            transform: scale(0.95);
+            box-shadow: 0 5px 20px rgba(212, 175, 55, 0.5);
+        }
+
+        .fortune-button.pressing .fortune-button-content {
+            opacity: 0.3;
+        }
+
+        .fortune-button.pressing .countdown-text {
+            display: block;
+        }
+
+        .fortune-button.animating {
+            animation: fortuneButtonPulse 0.6s ease-in-out infinite alternate;
+            box-shadow: 0 0 30px rgba(231, 76, 60, 0.6), 0 0 60px rgba(231, 76, 60, 0.4);
+        }
+
+        @keyframes fortuneButtonPulse {
+            0% { 
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(231, 76, 60, 0.4), 0 0 40px rgba(231, 76, 60, 0.2);
+            }
+            100% { 
+                transform: scale(1.03);
+                box-shadow: 0 0 30px rgba(231, 76, 60, 0.6), 0 0 60px rgba(231, 76, 60, 0.4);
+            }
+        }
+
+        .prize-container {
+            display: none;
+            text-align: center;
+            animation: slideInUp 0.8s ease-out;
+            background: linear-gradient(135deg, #fffdf0 0%, #f7f0e8 100%);
+            border: 2px solid #d4af37;
+            border-radius: 20px;
+            padding: 40px 30px;
+            margin: 20px 0;
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.3), 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prize-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #d4af37, #f7e98e, #d4af37);
+        }
+
+        .prize-container.active {
+            display: block;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .prize-title {
+            font-size: 2.2rem;
+            color: #d4af37;
+            margin-bottom: 15px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(212, 175, 55, 0.3);
+            background: linear-gradient(135deg, #d4af37, #f7e98e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .prize-name {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-weight: 600;
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
+            border-radius: 15px;
+            border: 2px solid #d4af37;
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.2);
+            display: inline-block;
+            min-width: 280px;
+        }
+
+        .prize-description {
+            font-size: 1.1rem;
+            color: #34495e;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            font-style: italic;
+            padding: 0 20px;
+        }
+
+        .prize-whatsapp-note {
+            font-size: 0.95rem;
+            color: #7f8c8d;
+            margin-top: 15px;
+            margin-bottom: 25px;
+            font-style: italic;
+            padding: 10px 20px;
+            background: rgba(244, 219, 212, 0.3);
+            border-radius: 10px;
+            border-left: 4px solid #d4af37;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #3498db, #85c1e9);
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 10px 30px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-secondary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .btn-secondary:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-secondary.animating {
+            animation: newGamePulse 2s infinite;
+        }
+
+        .btn-secondary.countdown {
+            background: linear-gradient(135deg, #d4af37, #f7e98e, #d4af37);
+            border: 2px solid #c19b26;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 8px 25px rgba(212, 175, 55, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+            transform: translateY(0);
+            transition: all 0.3s ease;
+            color: #2c3e50;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary.countdown:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 15px 35px rgba(212, 175, 55, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+            border-color: #b8941f;
+        }
+
+        .btn-secondary.countdown::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.8s ease, height 0.8s ease;
+        }
+
+        .btn-secondary.countdown:hover::before {
+            width: 200px;
+            height: 200px;
+        }
+
+        .countdown-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.95), rgba(247, 233, 142, 0.95));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            border-radius: 10px;
+            text-shadow: 0 2px 4px rgba(255, 255, 255, 0.3);
+            animation: weddingCountdownPulse 1s ease-in-out infinite;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes weddingCountdownPulse {
+            0%, 100% { 
+                opacity: 0.95;
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(212, 175, 55, 0.5) inset;
+            }
+            50% { 
+                opacity: 1;
+                transform: scale(1.02);
+                box-shadow: 0 0 30px rgba(212, 175, 55, 0.7) inset;
+            }
+        }
+
+        @keyframes newGamePulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 
+                    0 10px 30px rgba(212, 175, 55, 0.4),
+                    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+            }
+            50% { 
+                transform: scale(1.03);
+                box-shadow: 
+                    0 15px 40px rgba(212, 175, 55, 0.6),
+                    0 0 0 1px rgba(255, 255, 255, 0.3) inset,
+                    0 0 20px rgba(212, 175, 55, 0.3);
+            }
+        }
+
+        .new-game-sparkles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+
+        .new-game-sparkle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: linear-gradient(45deg, #fff, #f7e98e);
+            border-radius: 50%;
+            opacity: 0;
+            filter: drop-shadow(0 0 3px rgba(212, 175, 55, 0.5));
+        }
+
+        .new-game-sparkle:nth-child(odd) {
+            background: linear-gradient(45deg, #d4af37, #f7e98e);
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            width: 8px;
+            height: 8px;
+        }
+
+        .new-game-sparkle:nth-child(even) {
+            background: radial-gradient(circle, #fff 30%, #f7e98e 70%);
+            width: 5px;
+            height: 5px;
+        }
+
+        .new-game-sparkle.active {
+            animation: weddingSparkle 2s ease-in-out infinite;
+        }
+
+        @keyframes weddingSparkle {
+            0% {
+                opacity: 0;
+                transform: translateY(25px) scale(0) rotate(0deg);
+            }
+            30% {
+                opacity: 0.8;
+                transform: translateY(5px) scale(1.2) rotate(180deg);
+            }
+            60% {
+                opacity: 1;
+                transform: translateY(-15px) scale(1) rotate(270deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.5) rotate(360deg);
+            }
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            font-family: inherit;
+        }
+
+        .logout-btn:hover {
+            background: rgba(231, 76, 60, 1);
+            transform: scale(1.05);
+        }
+
+        /* Large screens */
+        @media (min-width: 1025px) {
+            .container {
+                max-width: 900px;
+            }
+        }
+
+        .error-message {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .success-message {
+            background: #27ae60;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #d4af37;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* iPad optimizations */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            .container {
+                max-width: 650px;
+                padding: 35px;
+            }
+            
+            .title {
+                font-size: 2.2rem;
+            }
+            
+            .radio-group {
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+            }
+            
+            /* Elegant client type responsive styles */
+            .client-type-title {
+                font-size: 1.8rem;
+                margin-bottom: 8px;
+            }
+            
+            .client-type-subtitle {
+                font-size: 1rem;
+                margin-bottom: 20px;
+            }
+            
+            .elegant-radio-group {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                max-width: 100%;
+            }
+            
+            .elegant-radio-label {
+                padding: 15px;
+                min-height: 60px;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                text-align: left;
+            }
+            
+            .radio-icon {
+                font-size: 2rem;
+                width: 50px;
+                margin-right: 15px;
+                margin-bottom: 0;
+            }
+            
+            .radio-text {
+                flex: 1;
+                text-align: left;
+            }
+            
+            .radio-title {
+                font-size: 1.1rem;
+                margin-bottom: 0;
+            }
+            
+            .radio-checkmark {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                font-size: 1.3rem;
+            }
+            
+            .fortune-button {
+                width: 280px;
+                height: 280px;
+                font-size: 1.4rem;
+            }
+            
+            .progress-ring {
+                width: 300px;
+                height: 300px;
+            }
+            
+            .progress-ring-circle {
+                cx: 150;
+                cy: 150;
+                r: 150;
+                stroke-dasharray: 942.48;
+                stroke-dashoffset: 942.48;
+            }
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 767px) {
+            .client-type-title {
+                font-size: 1.8rem;
+            }
+            
+            .client-type-subtitle {
+                font-size: 1rem;
+            }
+            
+            .elegant-radio-group {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .elegant-radio-label {
+                padding: 12px;
+                min-height: 50px;
+            }
+            
+            .radio-icon {
+                font-size: 1.8rem;
+                width: 40px;
+                margin-right: 12px;
+            }
+            
+            .radio-title {
+                font-size: 1rem;
+            }
+        }
+
+        /* Large screens */
+        @media (min-width: 1025px) {
+            .container {
+                max-width: 900px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Logout Button -->
+    <button class="logout-btn" onclick="logout()" title="Disconnetti Dispositivo">
+        🚪 Esci
+    </button>
+
+    <div class="container">
+        <div class="header">
+            <img src="{{ url_for('static', filename='images/logo-wedding.png') }}" alt="Mirell Logo" class="logo">
+            <p class="subtitle" id="mainSubtitle">{{ welcome_message }}</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <!-- Form Container -->
+        <div class="form-container" id="formContainer">
+            <!-- Step 1: Name and Surname -->
+            <div class="form-step active" id="step1">
+                <div class="form-group">
+                    <label class="form-label" for="name">Nome *</label>
+                    <input type="text" id="name" name="name" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="surname">Cognome *</label>
+                    <input type="text" id="surname" name="surname" class="form-input" required>
+                </div>
+                <button type="button" class="btn" onclick="nextStep(2)">Continua</button>
+            </div>
+
+            <!-- Step 2: Phone -->
+            <div class="form-step" id="step2">
+                <h3 id="step2Title" class="step-title">Perfetto! Ora inserisci il tuo numero</h3>
+                <div class="form-group">
+                    <label class="form-label" for="phone">Numero di Telefono *</label>
+                    <input type="tel" id="phone" name="phone" class="form-input" placeholder="3XX XXX XXXX" required>
+                </div>
+                <button type="button" class="btn" onclick="nextStep(3)">Continua</button>
+            </div>
+
+            <!-- Step 3: Client Type -->
+            <div class="form-step" id="step3">
+                <div class="client-type-container">
+                    <h2 class="client-type-title" id="step3Title">✨ Sono una futura...</h2>
+                    <p class="client-type-subtitle" id="step3Subtitle">Seleziona il tuo ruolo in questo giorno speciale</p>
+                    
+                    <div class="elegant-radio-group">
+                        <div class="elegant-radio-option" data-value="sposa">
+                            <input type="radio" id="sposa" name="client_type" value="sposa">
+                            <label for="sposa" class="elegant-radio-label">
+                                <div class="radio-icon">👰🏻</div>
+                                <div class="radio-text">
+                                    <span class="radio-title">Sposa</span>
+                                </div>
+                                <div class="radio-checkmark">✓</div>
+                            </label>
+                        </div>
+                        
+                        <div class="elegant-radio-option" data-value="mamma-sposa">
+                            <input type="radio" id="mamma-sposa" name="client_type" value="mamma-sposa">
+                            <label for="mamma-sposa" class="elegant-radio-label">
+                                <div class="radio-icon">👩🏻‍💼</div>
+                                <div class="radio-text">
+                                    <span class="radio-title">Mamma della Sposa</span>
+                                </div>
+                                <div class="radio-checkmark">✓</div>
+                            </label>
+                        </div>
+                        
+                        <div class="elegant-radio-option" data-value="mamma-sposo">
+                            <input type="radio" id="mamma-sposo" name="client_type" value="mamma-sposo">
+                            <label for="mamma-sposo" class="elegant-radio-label">
+                                <div class="radio-icon">👩🏻‍💼</div>
+                                <div class="radio-text">
+                                    <span class="radio-title">Mamma dello Sposo</span>
+                                </div>
+                                <div class="radio-checkmark">✓</div>
+                            </label>
+                        </div>
+                        
+                        <div class="elegant-radio-option" data-value="testimone">
+                            <input type="radio" id="testimone" name="client_type" value="testimone">
+                            <label for="testimone" class="elegant-radio-label">
+                                <div class="radio-icon">💎</div>
+                                <div class="radio-text">
+                                    <span class="radio-title">Testimone</span>
+                                </div>
+                                <div class="radio-checkmark">✓</div>
+                            </label>
+                        </div>
+                        
+                        <div class="elegant-radio-option" data-value="altro">
+                            <input type="radio" id="altro" name="client_type" value="altro">
+                            <label for="altro" class="elegant-radio-label">
+                                <div class="radio-icon">🌸</div>
+                                <div class="radio-text">
+                                    <span class="radio-title">Ospite Speciale</span>
+                                </div>
+                                <div class="radio-checkmark">✓</div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn" onclick="nextStep(4)">Continua il Viaggio ✨</button>
+            </div>
+
+            <!-- Step 4: Privacy Policy -->
+            <div class="form-step" id="step4">
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="privacy_accept" name="privacy_accept" required>
+                            <label for="privacy_accept" class="checkbox-label">
+                                Accetto la <strong>Privacy Policy</strong> e acconsento al trattamento dei miei dati personali per finalità di marketing e comunicazioni promozionali da parte di Mirell. *
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn" onclick="submitForm()">Accetto e Procedi al Gioco</button>
+            </div>
+        </div>
+
+        <!-- Game Container -->
+                <!-- Game Container -->
+        <div class="game-container" id="gameContainer">
+            <h2 style="color: #2c3e50; margin-bottom: 20px;">Premi e tieni premuto per tentare la fortuna!</h2>
+            <button class="fortune-button" id="fortuneButton">
+                <div class="hold-instruction">Tieni premuto per 3 secondi!</div>
+                <svg class="progress-ring">
+                    <circle class="progress-ring-circle" cx="135" cy="135" r="135"></circle>
+                </svg>
+                <div class="fortune-button-content">
+                    <span>TENTA<br>LA<br>FORTUNA</span>
+                </div>
+                <div class="countdown-text" id="countdownText">3</div>
+                <!-- Sparkles -->
+                <div class="sparkle" style="top: 20%; left: 80%;"></div>
+                <div class="sparkle" style="top: 80%; left: 20%;"></div>
+                <div class="sparkle" style="top: 30%; left: 10%;"></div>
+                <div class="sparkle" style="top: 70%; left: 90%;"></div>
+                <div class="sparkle" style="top: 10%; left: 50%;"></div>
+                <div class="sparkle" style="top: 90%; left: 50%;"></div>
+            </button>
+            <p style="color: #7f8c8d; margin-top: 20px;">
+                Tieni premuto il pulsante per 3 secondi per giocare
+            </p>
+        </div>
+
+        <!-- Prize Container -->
+        <div class="prize-container" id="prizeContainer">
+            <h2 class="prize-title" id="prizeTitle">🎉 Congratulazioni! 🎉</h2>
+            <h3 class="prize-name" id="prizeName"></h3>
+            <p class="prize-description" id="prizeDescription"></p>
+            <div class="prize-whatsapp-note">
+                📱 La ricevuta del premio verrà inviata via WhatsApp
+            </div>
+            <button type="button" class="btn btn-secondary countdown" id="newGameButton" onclick="startCountdown()">
+                <div class="new-game-sparkles">
+                    <div class="new-game-sparkle" style="left: 15%; top: 20%; animation-delay: 0s;"></div>
+                    <div class="new-game-sparkle" style="left: 85%; top: 25%; animation-delay: 0.2s;"></div>
+                    <div class="new-game-sparkle" style="left: 25%; top: 70%; animation-delay: 0.4s;"></div>
+                    <div class="new-game-sparkle" style="left: 75%; top: 75%; animation-delay: 0.6s;"></div>
+                    <div class="new-game-sparkle" style="left: 50%; top: 15%; animation-delay: 0.8s;"></div>
+                    <div class="new-game-sparkle" style="left: 50%; top: 85%; animation-delay: 1s;"></div>
+                    <div class="new-game-sparkle" style="left: 10%; top: 50%; animation-delay: 1.2s;"></div>
+                    <div class="new-game-sparkle" style="left: 90%; top: 55%; animation-delay: 1.4s;"></div>
+                    <div class="new-game-sparkle" style="left: 35%; top: 35%; animation-delay: 1.6s;"></div>
+                    <div class="new-game-sparkle" style="left: 65%; top: 40%; animation-delay: 1.8s;"></div>
+                </div>
+                <div class="countdown-overlay" id="countdownOverlay" style="display: none;">10</div>
+                Nuova Partita
+            </button>
+        </div>
+        
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let pressTimer = null;
+        let progressTimer = null;
+        let countdownTimer = null;
+        let isAnimating = false;
+        let pressProgress = 0;
+        let countdown = 3;
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        function nextStep(step) {
+            // Validate current step
+            if (currentStep === 1) {
+                const name = document.getElementById('name').value.trim();
+                const surname = document.getElementById('surname').value.trim();
+                if (!name || !surname) {
+                    showError('Nome e cognome sono obbligatori');
+                    return;
+                }
+                // Personalize the experience with the name
+                personalizeExperience(name);
+            } else if (currentStep === 2) {
+                const phone = document.getElementById('phone').value.trim();
+                if (!phone) {
+                    showError('Il numero di telefono è obbligatorio');
+                    return;
+                }
+            } else if (currentStep === 3) {
+                const clientType = document.querySelector('input[name="client_type"]:checked');
+                if (!clientType) {
+                    showError('Seleziona il tuo ruolo nel matrimonio');
+                    return;
+                }
+            }
+
+            // Hide current step
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            
+            // Show next step
+            currentStep = step;
+            document.getElementById(`step${currentStep}`).classList.add('active');
+        }
+
+        async function submitForm() {
+            // Validate privacy acceptance
+            const privacy = document.getElementById('privacy_accept').checked;
+            if (!privacy) {
+                showError('Devi accettare la Privacy Policy per continuare');
+                return;
+            }
+
+            // Gather form data
+            const formData = new FormData();
+            formData.append('name', document.getElementById('name').value.trim());
+            formData.append('surname', document.getElementById('surname').value.trim());
+            formData.append('phone', document.getElementById('phone').value.trim());
+            formData.append('client_type', document.querySelector('input[name="client_type"]:checked').value);
+            formData.append('privacy_accept', 'on');
+
+            try {
+                const response = await fetch('/fiera/submit', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Hide form and show game
+                    document.getElementById('formContainer').style.display = 'none';
+                    document.getElementById('gameContainer').classList.add('active');
+                } else {
+                    showError(result.error || 'Si è verificato un errore');
+                    
+                    // If user has already played, reset after showing error
+                    if (result.already_played) {
+                        setTimeout(() => {
+                            resetGame();
+                        }, 3000); // Reset after 3 seconds
+                    }
+                }
+            } catch (error) {
+                showError('Errore di connessione. Riprova più tardi.');
+            }
+        }
+
+        // Game logic
+        document.getElementById('fortuneButton').addEventListener('mousedown', startPress);
+        document.getElementById('fortuneButton').addEventListener('mouseup', endPress);
+        document.getElementById('fortuneButton').addEventListener('mouseleave', endPress);
+        document.getElementById('fortuneButton').addEventListener('touchstart', startPress);
+        document.getElementById('fortuneButton').addEventListener('touchend', endPress);
+
+        function startPress(e) {
+            e.preventDefault();
+            if (isAnimating) return;
+
+            const button = document.getElementById('fortuneButton');
+            const progressCircle = button.querySelector('.progress-ring-circle');
+            const countdownText = document.getElementById('countdownText');
+            const sparkles = button.querySelectorAll('.sparkle');
+            
+            button.classList.add('pressed', 'pressing');
+            pressProgress = 0;
+            countdown = 3;
+            countdownText.textContent = countdown;
+
+            // Activate sparkles
+            sparkles.forEach(sparkle => sparkle.classList.add('active'));
+            
+            // Start progress animation
+            progressTimer = setInterval(() => {
+                pressProgress += 1;
+                
+                // Determine circumference based on screen size
+                let circumference = 848.23; // Default for smaller screens
+                if (window.matchMedia('(min-width: 768px) and (max-width: 1024px)').matches) {
+                    circumference = 942.48; // iPad size
+                }
+                
+                const offset = circumference - (pressProgress / 300) * circumference;
+                progressCircle.style.strokeDashoffset = offset;
+                
+                if (pressProgress >= 300) {
+                    clearInterval(progressTimer);
+                    playGame();
+                }
+            }, 10); // Update every 10ms for smooth animation
+            
+            // Start countdown
+            countdownTimer = setInterval(() => {
+                countdown--;
+                countdownText.textContent = countdown;
+                
+                if (countdown <= 0) {
+                    clearInterval(countdownTimer);
+                }
+            }, 1000);
+            
+            // Fallback timer
+            pressTimer = setTimeout(() => {
+                playGame();
+            }, 3000);
+        }
+
+        function endPress(e) {
+            e.preventDefault();
+            
+            if (pressTimer) {
+                clearTimeout(pressTimer);
+                pressTimer = null;
+            }
+            
+            if (progressTimer) {
+                clearInterval(progressTimer);
+                progressTimer = null;
+            }
+            
+            if (countdownTimer) {
+                clearInterval(countdownTimer);
+                countdownTimer = null;
+            }
+            
+            const button = document.getElementById('fortuneButton');
+            const progressCircle = button.querySelector('.progress-ring-circle');
+            const sparkles = button.querySelectorAll('.sparkle');
+            
+            button.classList.remove('pressed', 'pressing');
+            
+            // Reset progress with correct circumference
+            let circumference = 848.23;
+            if (window.matchMedia('(min-width: 768px) and (max-width: 1024px)').matches) {
+                circumference = 942.48;
+            }
+            progressCircle.style.strokeDashoffset = circumference;
+            
+            sparkles.forEach(sparkle => sparkle.classList.remove('active'));
+            
+            pressProgress = 0;
+            countdown = 3;
+        }
+
+        async function playGame() {
+            if (isAnimating) return;
+            isAnimating = true;
+
+            // Clear all timers
+            if (pressTimer) clearTimeout(pressTimer);
+            if (progressTimer) clearInterval(progressTimer);
+            if (countdownTimer) clearInterval(countdownTimer);
+
+            const button = document.getElementById('fortuneButton');
+            const sparkles = button.querySelectorAll('.sparkle');
+            
+            button.classList.add('animating');
+            button.classList.remove('pressed', 'pressing');
+            sparkles.forEach(sparkle => sparkle.classList.remove('active'));
+            
+            // Replace button content with loading animation
+            button.innerHTML = `
+                <svg class="progress-ring">
+                    <circle class="progress-ring-circle" cx="135" cy="135" r="135" style="stroke-dashoffset: 0;"></circle>
+                </svg>
+                <div class="loading"></div>
+            `;
+
+            try {
+                // Simulate animation delay
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                const response = await fetch('/fiera/game', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Personalize the prize announcement
+                    const userName = document.getElementById('name').value.trim();
+                    document.getElementById('prizeTitle').innerHTML = `🎉 Congratulazioni <span class="personalized-text">${userName}</span>! 🎉`;
+                    
+                    // Show prize
+                    document.getElementById('prizeName').textContent = result.prize.name;
+                    document.getElementById('prizeDescription').textContent = result.prize.description;
+                    
+                    document.getElementById('gameContainer').classList.remove('active');
+                    document.getElementById('prizeContainer').classList.add('active');
+                    
+                    // Launch confetti celebration
+                    launchConfettiCelebration();
+                    
+                    // Activate new game button animation
+                    setTimeout(() => {
+                        const newGameButton = document.getElementById('newGameButton');
+                        const sparkles = newGameButton.querySelectorAll('.new-game-sparkle');
+                        sparkles.forEach(sparkle => sparkle.classList.add('active'));
+                        
+                        // Start auto countdown after 2 seconds
+                        setTimeout(() => {
+                            startCountdown();
+                        }, 2000);
+                    }, 1000); // Start animation 1 second after prize is shown
+                } else {
+                    showError(result.error || 'Errore durante il gioco');
+                    resetButton();
+                }
+            } catch (error) {
+                showError('Errore di connessione durante il gioco');
+                resetButton();
+            }
+
+            isAnimating = false;
+        }
+
+        function resetButton() {
+            const button = document.getElementById('fortuneButton');
+            button.classList.remove('animating', 'pressed', 'pressing');
+            
+            // Determine circle size based on screen size
+            let circleSize = 135;
+            let circumference = 848.23;
+            if (window.matchMedia('(min-width: 768px) and (max-width: 1024px)').matches) {
+                circleSize = 150;
+                circumference = 942.48;
+            }
+            
+            button.innerHTML = `
+                <svg class="progress-ring">
+                    <circle class="progress-ring-circle" cx="${circleSize}" cy="${circleSize}" r="${circleSize}" style="stroke-dashoffset: ${circumference};"></circle>
+                </svg>
+                <div class="fortune-button-content">
+                    <span>TENTA<br>LA<br>FORTUNA</span>
+                </div>
+                <div class="countdown-text" id="countdownText">3</div>
+                <div class="sparkle" style="top: 20%; left: 80%;"></div>
+                <div class="sparkle" style="top: 80%; left: 20%;"></div>
+                <div class="sparkle" style="top: 30%; left: 10%;"></div>
+                <div class="sparkle" style="top: 70%; left: 90%;"></div>
+                <div class="sparkle" style="top: 10%; left: 50%;"></div>
+                <div class="sparkle" style="top: 90%; left: 50%;"></div>
+            `;
+        }
+
+        async function resetGame() {
+            try {
+                await fetch('/fiera/reset', {
+                    method: 'POST'
+                });
+
+                // Reset UI
+                currentStep = 1;
+                document.querySelectorAll('.form-step').forEach(step => step.classList.remove('active'));
+                document.getElementById('step1').classList.add('active');
+                document.getElementById('formContainer').style.display = 'block';
+                document.getElementById('gameContainer').classList.remove('active');
+                document.getElementById('prizeContainer').classList.remove('active');
+
+                // Clear form
+                document.getElementById('name').value = '';
+                document.getElementById('surname').value = '';
+                document.getElementById('phone').value = '';
+                document.querySelectorAll('input[name="client_type"]').forEach(radio => radio.checked = false);
+                document.getElementById('privacy_accept').checked = false;
+
+                // Reset game button
+                resetButton();
+
+            } catch (error) {
+                showError('Errore durante il reset');
+            }
+        }
+
+        function startCountdown() {
+            const button = document.getElementById('newGameButton');
+            const overlay = document.getElementById('countdownOverlay');
+            let count = 10;
+            
+            // Show countdown but keep button clickable
+            overlay.textContent = count;
+            overlay.style.display = 'block';
+            
+            // Make button clickable to skip countdown
+            button.onclick = function() {
+                clearInterval(countdownInterval);
+                resetGame();
+            };
+            
+            const countdownInterval = setInterval(() => {
+                count--;
+                overlay.textContent = count;
+                
+                if (count <= 0) {
+                    clearInterval(countdownInterval);
+                    resetGame();
+                }
+            }, 1000);
+        }
+
+        async function logout() {
+            if (confirm('Sei sicuro di voler disconnettere questo dispositivo?')) {
+                try {
+                    await fetch('/fiera/logout', {
+                        method: 'POST'
+                    });
+                    window.location.href = '/fiera/auth';
+                } catch (error) {
+                    console.error('Errore durante il logout:', error);
+                    window.location.href = '/fiera/auth';
+                }
+            }
+        }
+
+        // Personalization function
+        function personalizeExperience(name) {
+            // Remove subtitle after intro (hide it)
+            document.getElementById('mainSubtitle').style.display = 'none';
+            
+            // Update step 2 title
+            document.getElementById('step2Title').innerHTML = `Perfetto <span class="personalized-text">${name}</span>! Ora inserisci il tuo numero`;
+            
+            // Update step 3 title and subtitle
+            document.getElementById('step3Title').innerHTML = `✨ Ciao <span class="personalized-text">${name}</span>, dimmi...`;
+            document.getElementById('step3Subtitle').innerHTML = `Qual è il tuo ruolo speciale in questo matrimonio?`;
+        }
+
+        // Confetti celebration function using confetti library
+        function launchConfettiCelebration() {
+            // First burst - from left
+            confetti({
+                particleCount: 50,
+                spread: 60,
+                origin: { x: 0.2, y: 0.7 },
+                colors: ['#d4af37', '#f7e98e', '#ff69b4', '#00bcd4', '#4caf50']
+            });
+
+            // Second burst - from right (delayed)
+            setTimeout(() => {
+                confetti({
+                    particleCount: 50,
+                    spread: 60,
+                    origin: { x: 0.8, y: 0.7 },
+                    colors: ['#d4af37', '#f7e98e', '#ff69b4', '#00bcd4', '#4caf50']
+                });
+            }, 200);
+
+            // Third burst - from center (delayed)
+            setTimeout(() => {
+                confetti({
+                    particleCount: 80,
+                    spread: 80,
+                    origin: { x: 0.5, y: 0.6 },
+                    colors: ['#d4af37', '#f7e98e', '#ff69b4', '#00bcd4', '#4caf50']
+                });
+            }, 400);
+
+            // Final shower effect
+            setTimeout(() => {
+                confetti({
+                    particleCount: 100,
+                    spread: 120,
+                    origin: { x: 0.5, y: 0.3 },
+                    colors: ['#d4af37', '#f7e98e', '#ff69b4', '#00bcd4', '#4caf50'],
+                    shapes: ['square', 'circle']
+                });
+            }, 600);
+        }
+
+        // Auto-format phone number
+        document.getElementById('phone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 10) value = value.slice(0, 10);
+            e.target.value = value;
+        });
+    </script>
+</body>
+</html>
