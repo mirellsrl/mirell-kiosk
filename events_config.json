@@ -1,0 +1,54 @@
+{
+  "events": {
+    "fiera-2025": {
+      "password": "fiera2025",
+      "tag_prefix": "fiera-2025",
+      "welcome_message": "Benvenuto alla Fiera 2025!",
+      "prizes": [
+        {
+          "name": "Tote Bag",
+          "description": "Hai vinto una elegante Tote Bag Mirell",
+          "probability": 5,
+          "tag": "tote-bag"
+        },
+        {
+          "name": "Penna",
+          "description": "Hai vinto una penna personalizzata Mirell",
+          "probability": 10,
+          "tag": "penna"
+        },
+        {
+          "name": "Riparazione Gratuita",
+          "description": "Ripara gratuitamente il tuo abito",
+          "probability": 85,
+          "tag": "fiera-riparazione-gratuita"
+        }
+      ]
+    },
+    "fiera-mamma": {
+      "password": "mamma2025",
+      "tag_prefix": "fiera-mamma",
+      "welcome_message": "Benvenuta mamma! Gioca e vinci bellissimi premi!",
+      "prizes": [
+        {
+          "name": "Tote Bag Premium",
+          "description": "Hai vinto una esclusiva Tote Bag Premium Mirell",
+          "probability": 70,
+          "tag": "tote-bag-premium"
+        },
+        {
+          "name": "Sciarpa Mirell",
+          "description": "Hai vinto una bellissima sciarpa esclusiva Mirell",
+          "probability": 20,
+          "tag": "sciarpa"
+        },
+        {
+          "name": "Voucher Sconto",
+          "description": "Hai vinto un voucher sconto del 20% sul prossimo acquisto",
+          "probability": 10,
+          "tag": "voucher-20"
+        }
+      ]
+    }
+  }
+}

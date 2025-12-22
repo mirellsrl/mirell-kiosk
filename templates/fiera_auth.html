@@ -224,6 +224,10 @@
             {% endif %}
         {% endwith %}
 
+        {% if error %}
+            <div class="error-message show">{{ error }}</div>
+        {% endif %}
+
         <form method="POST" class="auth-form" id="authForm">
             <div class="form-group">
                 <label class="form-label" for="device_key">Codice Dispositivo</label>
