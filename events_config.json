@@ -21,7 +21,7 @@
           "name": "Riparazione Gratuita",
           "description": "Ripara gratuitamente il tuo abito",
           "probability": 85,
-          "tag": "fiera-riparazione-gratuita"
+          "tag": "riparazione-gratuita"
         }
       ]
     },

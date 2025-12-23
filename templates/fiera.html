@@ -1202,18 +1202,12 @@
         </div>
 
         <!-- Game Container -->
-                <!-- Game Container -->
         <div class="game-container" id="gameContainer">
-            <h2 style="color: #2c3e50; margin-bottom: 20px;">Premi e tieni premuto per tentare la fortuna!</h2>
+            <h2 style="color: #2c3e50; margin-bottom: 20px;">Premi il pulsante per tentare la fortuna!</h2>
             <button class="fortune-button" id="fortuneButton">
-                <div class="hold-instruction">Tieni premuto per 3 secondi!</div>
-                <svg class="progress-ring">
-                    <circle class="progress-ring-circle" cx="135" cy="135" r="135"></circle>
-                </svg>
                 <div class="fortune-button-content">
                     <span>TENTA<br>LA<br>FORTUNA</span>
                 </div>
-                <div class="countdown-text" id="countdownText">3</div>
                 <!-- Sparkles -->
                 <div class="sparkle" style="top: 20%; left: 80%;"></div>
                 <div class="sparkle" style="top: 80%; left: 20%;"></div>
@@ -1223,7 +1217,7 @@
                 <div class="sparkle" style="top: 90%; left: 50%;"></div>
             </button>
             <p style="color: #7f8c8d; margin-top: 20px;">
-                Tieni premuto il pulsante per 3 secondi per giocare
+                Clicca il pulsante per giocare
             </p>
         </div>
 
@@ -1257,12 +1251,7 @@
 
     <script>
         let currentStep = 1;
-        let pressTimer = null;
-        let progressTimer = null;
-        let countdownTimer = null;
         let isAnimating = false;
-        let pressProgress = 0;
-        let countdown = 3;
 
         function showError(message) {
             const errorDiv = document.getElementById('errorMessage');
@@ -1358,117 +1347,17 @@
             }
         }
 
-        // Game logic
-        document.getElementById('fortuneButton').addEventListener('mousedown', startPress);
-        document.getElementById('fortuneButton').addEventListener('mouseup', endPress);
-        document.getElementById('fortuneButton').addEventListener('mouseleave', endPress);
-        document.getElementById('fortuneButton').addEventListener('touchstart', startPress);
-        document.getElementById('fortuneButton').addEventListener('touchend', endPress);
-
-        function startPress(e) {
-            e.preventDefault();
-            if (isAnimating) return;
-
-            const button = document.getElementById('fortuneButton');
-            const progressCircle = button.querySelector('.progress-ring-circle');
-            const countdownText = document.getElementById('countdownText');
-            const sparkles = button.querySelectorAll('.sparkle');
-            
-            button.classList.add('pressed', 'pressing');
-            pressProgress = 0;
-            countdown = 3;
-            countdownText.textContent = countdown;
-
-            // Activate sparkles
-            sparkles.forEach(sparkle => sparkle.classList.add('active'));
-            
-            // Start progress animation
-            progressTimer = setInterval(() => {
-                pressProgress += 1;
-                
-                // Determine circumference based on screen size
-                let circumference = 848.23; // Default for smaller screens
-                if (window.matchMedia('(min-width: 768px) and (max-width: 1024px)').matches) {
-                    circumference = 942.48; // iPad size
-                }
-                
-                const offset = circumference - (pressProgress / 300) * circumference;
-                progressCircle.style.strokeDashoffset = offset;
-                
-                if (pressProgress >= 300) {
-                    clearInterval(progressTimer);
-                    playGame();
-                }
-            }, 10); // Update every 10ms for smooth animation
-            
-            // Start countdown
-            countdownTimer = setInterval(() => {
-                countdown--;
-                countdownText.textContent = countdown;
-                
-                if (countdown <= 0) {
-                    clearInterval(countdownTimer);
-                }
-            }, 1000);
-            
-            // Fallback timer
-            pressTimer = setTimeout(() => {
-                playGame();
-            }, 3000);
-        }
-
-        function endPress(e) {
-            e.preventDefault();
-            
-            if (pressTimer) {
-                clearTimeout(pressTimer);
-                pressTimer = null;
-            }
-            
-            if (progressTimer) {
-                clearInterval(progressTimer);
-                progressTimer = null;
-            }
-            
-            if (countdownTimer) {
-                clearInterval(countdownTimer);
-                countdownTimer = null;
-            }
-            
-            const button = document.getElementById('fortuneButton');
-            const progressCircle = button.querySelector('.progress-ring-circle');
-            const sparkles = button.querySelectorAll('.sparkle');
-            
-            button.classList.remove('pressed', 'pressing');
-            
-            // Reset progress with correct circumference
-            let circumference = 848.23;
-            if (window.matchMedia('(min-width: 768px) and (max-width: 1024px)').matches) {
-                circumference = 942.48;
-            }
-            progressCircle.style.strokeDashoffset = circumference;
-            
-            sparkles.forEach(sparkle => sparkle.classList.remove('active'));
-            
-            pressProgress = 0;
-            countdown = 3;
-        }
+        // Game logic - Simple click to play
+        document.getElementById('fortuneButton').addEventListener('click', playGame);
 
         async function playGame() {
             if (isAnimating) return;
             isAnimating = true;
 
-            // Clear all timers
-            if (pressTimer) clearTimeout(pressTimer);
-            if (progressTimer) clearInterval(progressTimer);
-            if (countdownTimer) clearInterval(countdownTimer);
-
             const button = document.getElementById('fortuneButton');
             const sparkles = button.querySelectorAll('.sparkle');
             
             button.classList.add('animating');
-            button.classList.remove('pressed', 'pressing');
-            sparkles.forEach(sparkle => sparkle.classList.remove('active'));
             
             // Replace button content with loading animation
             button.innerHTML = `
@@ -1533,22 +1422,10 @@
             const button = document.getElementById('fortuneButton');
             button.classList.remove('animating', 'pressed', 'pressing');
             
-            // Determine circle size based on screen size
-            let circleSize = 135;
-            let circumference = 848.23;
-            if (window.matchMedia('(min-width: 768px) and (max-width: 1024px)').matches) {
-                circleSize = 150;
-                circumference = 942.48;
-            }
-            
             button.innerHTML = `
-                <svg class="progress-ring">
-                    <circle class="progress-ring-circle" cx="${circleSize}" cy="${circleSize}" r="${circleSize}" style="stroke-dashoffset: ${circumference};"></circle>
-                </svg>
                 <div class="fortune-button-content">
                     <span>TENTA<br>LA<br>FORTUNA</span>
                 </div>
-                <div class="countdown-text" id="countdownText">3</div>
                 <div class="sparkle" style="top: 20%; left: 80%;"></div>
                 <div class="sparkle" style="top: 80%; left: 20%;"></div>
                 <div class="sparkle" style="top: 30%; left: 10%;"></div>
