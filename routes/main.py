@@ -92,7 +92,7 @@ def register_main_routes(app):
         if birthdate:
             birthdate = datetime.strptime(birthdate, '%Y-%m-%d').strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
         
-        tags = ["negozio fisico", "da revisionare"]
+        tags = ["negozio fisico", "da revisionare", "top"]
 
         if phone and session.get('sms_marketing_accept'):
             phone = "+39" + phone
@@ -143,7 +143,7 @@ def register_main_routes(app):
                 return render_template('wedding.html', name=name, surname=surname, phone=phone, email=email, birthdate=birthdate)
             
             # Since this is an internal platform, we always add the default tags
-            tags = ["negozio fisico", "cliente wedding", "da revisionare"]
+            tags = ["negozio fisico", "cliente wedding", "da revisionare", "top"]
             
             # Process the data - create contact in Squadd
             try:
