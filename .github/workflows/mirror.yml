@@ -1,0 +1,29 @@
+name: Mirror to Render repo
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Il repo mirror è read-only: non committare mai direttamente lì.
+concurrency:
+  group: mirror-main
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Push to mirror
+        env:
+          MIRROR_REPO: ${{ vars.MIRROR_REPO }}
+          MIRROR_PAT: ${{ secrets.MIRROR_PAT }}
+        run: |
+          set -euo pipefail
+          git push --force \
+            "https://x-access-token:${MIRROR_PAT}@github.com/${MIRROR_REPO}.git" \
+            HEAD:refs/heads/main
