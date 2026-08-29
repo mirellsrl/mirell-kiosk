@@ -49,6 +49,31 @@
           "tag": "voucher-20"
         }
       ]
+    },
+    "ferrara-sposi-expo-2026": {
+      "password": "ferrara2026",
+      "tag_prefix": "ferrara-sposi-expo-2026",
+      "welcome_message": "Benvenuti a Ferrara Sposi Expo 2026! Giocate e vincete!",
+      "prizes": [
+        {
+          "name": "Riparazione Gratuita",
+          "description": "Hai vinto una riparazione gratuita",
+          "probability": 60,
+          "tag": "riparazione-gratuita"
+        },
+        {
+          "name": "Penna",
+          "description": "Hai vinto una penna personalizzata Mirell",
+          "probability": 20,
+          "tag": "penna"
+        },
+        {
+          "name": "Specchio",
+          "description": "Hai vinto uno specchio Mirell",
+          "probability": 20,
+          "tag": "specchio"
+        }
+      ]
     }
   }
 }
