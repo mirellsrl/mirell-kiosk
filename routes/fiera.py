@@ -34,6 +34,14 @@ def get_event_by_password(password):
     logging.warning(f"No event found for password: {password_lower}")
     return None, None
 
+def played_tag(tag_prefix):
+    """Tag marking that a contact has played a specific event"""
+    return f"{tag_prefix}-partita-effettuata"
+
+def prize_tag(tag_prefix, prize_tag_name):
+    """Event-scoped prize tag, so prizes from other events don't collide"""
+    return f"{tag_prefix}-{prize_tag_name}"
+
 def select_prize(event_key):
     """Select a prize based on probability weights for specific event"""
     try:
@@ -170,13 +178,13 @@ def fiera_submit():
             tags=tags
         )
         
-        # Check if user has already played
+        # Check if user has already played this event
         user_tags = result.get('tags', [])
-        if 'partita-effettuata' in user_tags:
-            logging.info(f"User {name} {surname} has already played the game")
+        if played_tag(tag_prefix) in user_tags:
+            logging.info(f"User {name} {surname} has already played event '{event_key}'")
             return {
                 'success': False, 
-                'error': 'Hai già giocato! Ogni persona può giocare una sola volta.',
+                'error': 'Hai già giocato a questo evento! Ogni persona può giocare una sola volta.',
                 'already_played': True
             }, 400
         
@@ -207,18 +215,21 @@ def fiera_game():
             return {'success': False, 'error': 'Devi prima compilare il modulo'}, 400
         
         event_key = session.get('event_key')
+        config = load_events_config()
+        event_config = config.get('events', {}).get(event_key, {})
+        tag_prefix = event_config.get('tag_prefix', 'fiera')
         
         # Select a prize for this event
         prize = select_prize(event_key)
         
-        # Update contact with game tags
         name = session['fiera_name']
         surname = session['fiera_surname']
         phone = session['fiera_phone']
         existing_tags = session['fiera_tags']
         
-        # Add game completion and prize tags
-        updated_tags = existing_tags + ["partita-effettuata", prize['tag']]
+        # Event-scoped tags: the GHL workflow triggers on the played tag
+        # and branches on the prize tag
+        updated_tags = existing_tags + [played_tag(tag_prefix), prize_tag(tag_prefix, prize['tag'])]
         
         # Update contact in SquaddCRM
         createSquaddCRMContact(
@@ -228,6 +239,10 @@ def fiera_game():
             phone_number=phone, 
             tags=updated_tags
         )
+        
+        # Consume the game session so the same submission can't be played twice
+        for key in ('fiera_name', 'fiera_surname', 'fiera_phone', 'fiera_client_type', 'fiera_tags'):
+            session.pop(key, None)
         
         logging.info(f"Fiera game completed for {name} {surname} in event '{event_key}'. Prize: {prize['name']}")
         return {

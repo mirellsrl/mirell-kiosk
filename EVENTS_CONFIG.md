@@ -187,7 +187,9 @@ If an event doesn't specify custom prizes, the system falls back to `fiera_prize
 All contacts created at an event are tagged with:
 1. The event's tag prefix (e.g., `fiera-2025`)
 2. A client-type tag (e.g., `fiera-2025-sposa`)
-3. Additional tags based on game outcome (e.g., `partita-effettuata`, `tote-bag`)
+3. Game outcome tags, scoped to the event so each person can play once per event:
+   - `<tag_prefix>-partita-effettuata` (e.g., `ferrara-sposi-expo-2026-partita-effettuata`) — used to block a second play at the same event and to trigger the GHL prize workflow
+   - `<tag_prefix>-<prize tag>` (e.g., `ferrara-sposi-expo-2026-penna`) — used by the GHL workflow to pick the prize message
 
 This allows you to:
 - Filter contacts by event in SquaddCRM
