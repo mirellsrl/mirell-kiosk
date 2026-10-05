@@ -58,20 +58,20 @@
         {
           "name": "Riparazione Gratuita",
           "description": "Hai vinto una riparazione gratuita",
-          "probability": 60,
+          "probability": 40,
           "tag": "riparazione-gratuita"
         },
         {
           "name": "Penna",
           "description": "Hai vinto una penna personalizzata Mirell",
-          "probability": 20,
+          "probability": 30,
           "tag": "penna"
         },
         {
-          "name": "Specchio",
-          "description": "Hai vinto uno specchio Mirell",
-          "probability": 20,
-          "tag": "specchio"
+          "name": "Specchietto",
+          "description": "Hai vinto uno specchietto Mirell",
+          "probability": 30,
+          "tag": "specchietto"
         }
       ]
     }
