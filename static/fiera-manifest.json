@@ -1,7 +1,9 @@
 {
     "name": "Mirell Fiera - Tenta la Fortuna",
     "short_name": "Mirell Fiera",
-    "start_url": "/fiera",
+    "id": "/fiera/",
+    "start_url": "/fiera/",
+    "scope": "/fiera/",
     "display": "fullscreen",
     "orientation": "landscape-primary",
     "background_color": "#f5f5f5",
